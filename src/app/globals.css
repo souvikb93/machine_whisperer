@@ -1,26 +1,95 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   MachineWhisperer — Design Tokens (Tailwind v4 @theme)
+   All colors registered here so utility classes resolve to
+   these tokens. No hardcoded hex in components.
+   ============================================================ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  /* === FONTS === */
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* === BOSCH RED === */
+  --color-red-50:  #FFF0F0;
+  --color-red-100: #FFD6D6;
+  --color-red-200: #FFB3B3;
+  --color-red-500: #E20015;
+  --color-red-600: #C20012;
+  --color-red-700: #9A000E;
+
+  /* === NEUTRALS (grey) === */
+  --color-grey-50:  #F7F7F7;
+  --color-grey-100: #EFEFEF;
+  --color-grey-200: #D9D9D9;
+  --color-grey-300: #BDBDBD;
+  --color-grey-400: #9E9E9E;
+  --color-grey-500: #757575;
+  --color-grey-600: #5C5C5C;
+  --color-grey-700: #3D3D3D;
+  --color-grey-800: #2A2A2A;
+  --color-grey-900: #1A1A1A;
+  --color-white:    #FFFFFF;
+
+  /* === AMBER (warning) === */
+  --color-amber-50:  #FFF8E6;
+  --color-amber-100: #FDECC8;
+  --color-amber-200: #FCD34D;
+  --color-amber-400: #F59E0B;
+  --color-amber-600: #D97706;
+  --color-amber-700: #B45309;
+  --color-amber-800: #92400E;
+
+  /* === GREEN (success) === */
+  --color-green-50:  #ECFDF5;
+  --color-green-100: #D1FAE5;
+  --color-green-400: #34D399;
+  --color-green-500: #10B981;
+  --color-green-600: #059669;
+  --color-green-700: #065F46;
+
+  /* === BLUE (info) === */
+  --color-blue-50:  #EFF6FF;
+  --color-blue-100: #DBEAFE;
+  --color-blue-500: #3B82F6;
+  --color-blue-700: #1D4ED8;
+  --color-blue-800: #1E40AF;
+
+  /* === PURPLE (rare / plant knowledge) === */
+  --color-purple-50:  #FAF5FF;
+  --color-purple-100: #F3E8FF;
+  --color-purple-200: #E9D5FF;
+  --color-purple-600: #9333EA;
+  --color-purple-700: #7E22CE;
+
+  /* === BRAND (semantic) === */
+  --color-brand:        #E20015;
+  --color-brand-hover:  #C20012;
+  --color-brand-active: #9A000E;
+
+  /* === RADIUS === */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* === ANIMATION === */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-grey-50);
+  color: var(--color-grey-900);
+  font-family: var(--font-sans);
+}
+
+/* Pulsing dot for CRITICAL severity */
+@keyframes mw-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+.mw-pulse {
+  animation: mw-pulse 2s var(--ease-default) infinite;
 }
