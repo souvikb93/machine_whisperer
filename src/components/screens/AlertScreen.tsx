@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import { useDowntimeCounter } from "@/hooks/useDowntimeCounter";
 import { useScanResult } from "@/hooks/useScanResult";
 import { getIssueById } from "@/lib/mockData";
+import { STRINGS, MOCK_CONTENT, t } from "@/lib/i18n";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatEuro } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { WarrantyStatus } from "@/lib/types";
@@ -31,17 +33,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-const WARRANTY_CONFIG: Record<
-  WarrantyStatus,
-  { icon: typeof ShieldCheck; label: string; className: string }
-> = {
-  active: { icon: ShieldCheck, label: "Active", className: "text-green-600" },
-  expiring: { icon: ShieldAlert, label: "Expiring soon", className: "text-amber-600" },
-  expired: { icon: ShieldOff, label: "Expired", className: "text-red-600" },
-};
-
 export function AlertScreen() {
   const { id } = useParams<{ id: string }>();
+  const { lang } = useLanguage();
+  const s = STRINGS.alert;
   const issue = getIssueById(id);
   const { result: scanResult } = useScanResult(id ?? "");
   const live = useDowntimeCounter(
@@ -55,12 +50,27 @@ export function AlertScreen() {
 
   const hasError = !!(scanResult?.errorCode ?? issue.errorCode);
 
+  const WARRANTY_CONFIG: Record<
+    WarrantyStatus,
+    { icon: typeof ShieldCheck; label: string; className: string }
+  > = {
+    active:   { icon: ShieldCheck, label: t(s.warrantyActive, lang),   className: "text-green-600" },
+    expiring: { icon: ShieldAlert, label: t(s.warrantyExpiring, lang), className: "text-amber-600" },
+    expired:  { icon: ShieldOff,  label: t(s.warrantyExpired, lang),  className: "text-red-600" },
+  };
+
   const warranty = WARRANTY_CONFIG[supplier.warrantyStatus];
   const WarrantyIcon = warranty.icon;
 
+  // Localised machine type
+  const machineContent = MOCK_CONTENT[issue.id as keyof typeof MOCK_CONTENT];
+  const machineType = machineContent
+    ? t((machineContent as unknown as { machineType: { en: string; de: string } }).machineType, lang)
+    : machine.type;
+
   return (
     <AppShell
-      title="Alert"
+      title={t(s.title, lang)}
       back
       backHref="/dashboard"
       hideBottomNav
@@ -75,7 +85,7 @@ export function AlertScreen() {
         <div className="flex items-center gap-2 border-b border-red-100 bg-red-50 px-4 py-3">
           <span className="h-2 w-2 rounded-full bg-red-500 mw-pulse" />
           <span className="text-sm font-semibold text-red-600">
-            CRITICAL · MACHINE STOPPED
+            {t(s.criticalBanner, lang)}
           </span>
         </div>
 
@@ -86,34 +96,34 @@ export function AlertScreen() {
               {live.formatted}
             </div>
             <p className="mt-1.5 text-sm text-grey-500">
-              Machine stopped · Downtime counting
+              {t(s.downtimeCaption, lang)}
             </p>
             <p className="mt-1 text-sm font-semibold text-red-600">
-              Estimated loss: {formatEuro(live.cost)} and counting
+              {t(s.estimatedLoss, lang)} {formatEuro(live.cost)} {t(s.andCounting, lang)}
             </p>
           </Card>
 
           {/* Location + Machine info */}
           <div>
-            <SectionLabel>Location &amp; Machine</SectionLabel>
+            <SectionLabel>{t(s.sectionLocation, lang)}</SectionLabel>
             <Card className="divide-y divide-grey-100 p-4">
               <div className="flex items-center gap-2 pb-2">
                 <MapPin className="h-4 w-4 text-grey-400" />
                 <span className="text-sm text-grey-700">
-                  {machine.hall} · {machine.line} · Station {machine.station}
+                  {machine.hall} · {machine.line} · {t(s.station, lang)} {machine.station}
                 </span>
               </div>
               <div className="pt-2">
-                <InfoRow label="Machine ID" value={machine.id} />
-                <InfoRow label="Type" value={machine.type} />
-                <InfoRow label="Model" value={machine.model} />
-                <InfoRow label="Serial No." value={machine.serialNumber} />
-                <InfoRow label="Installed" value={machine.installDate} />
-                <InfoRow label="Last Service" value={machine.lastMaintenance} />
+                <InfoRow label={t(s.machineId, lang)}    value={machine.id} />
+                <InfoRow label={t(s.type, lang)}         value={machineType} />
+                <InfoRow label={t(s.model, lang)}        value={machine.model} />
+                <InfoRow label={t(s.serialNo, lang)}     value={machine.serialNumber} />
+                <InfoRow label={t(s.installed, lang)}    value={machine.installDate} />
+                <InfoRow label={t(s.lastService, lang)}  value={machine.lastMaintenance} />
                 <div className="flex items-center justify-between py-1.5">
-                  <span className="text-sm text-grey-500">Status</span>
+                  <span className="text-sm text-grey-500">{t(s.statusLabel, lang)}</span>
                   <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600">
-                    <span className="h-2 w-2 rounded-full bg-red-500" /> STOPPED
+                    <span className="h-2 w-2 rounded-full bg-red-500" /> {t(s.stopped, lang)}
                   </span>
                 </div>
               </div>
@@ -122,7 +132,7 @@ export function AlertScreen() {
 
           {/* Supplier info */}
           <div>
-            <SectionLabel>Supplier</SectionLabel>
+            <SectionLabel>{t(s.sectionSupplier, lang)}</SectionLabel>
             <Card className="divide-y divide-grey-100 p-4">
               <div className="pb-3">
                 <p className="font-semibold text-grey-900">{supplier.name}</p>
@@ -130,16 +140,16 @@ export function AlertScreen() {
               </div>
               <div className="space-y-2 pt-3">
                 {supplier.partNumber && (
-                  <InfoRow label="Part No." value={supplier.partNumber} />
+                  <InfoRow label={t(s.partNo, lang)} value={supplier.partNumber} />
                 )}
                 {supplier.leadTimeDays && (
                   <InfoRow
-                    label="Lead Time"
-                    value={`${supplier.leadTimeDays} business days`}
+                    label={t(s.leadTime, lang)}
+                    value={`${supplier.leadTimeDays} ${t(s.businessDays, lang)}`}
                   />
                 )}
                 <div className="flex items-center justify-between py-1.5">
-                  <span className="text-sm text-grey-500">Warranty</span>
+                  <span className="text-sm text-grey-500">{t(s.warranty, lang)}</span>
                   <span
                     className={cn(
                       "inline-flex items-center gap-1 text-sm font-medium",
@@ -156,16 +166,16 @@ export function AlertScreen() {
 
           {/* System info */}
           <div className="space-y-1 text-sm text-grey-500 pb-2">
-            <p>Alert received: Auto-sensor</p>
-            <p>Assigned to: Morning Shift · {issue.technicianName}</p>
+            <p>{t(s.alertReceived, lang)}</p>
+            <p>{t(s.assignedTo, lang)} {issue.technicianName}</p>
           </div>
         </div>
       </div>
 
-      <div className="sticky bottom-0 border-t border-grey-200 bg-white px-4 py-3">
+      <div className="cta-footer sticky bottom-0 px-4 pt-3">
         <Link href={`/scan/${issue.id}`} className="block">
           <Button size="lg" className="w-full">
-            {hasError ? "Re-scan HMI →" : "Scan HMI to Diagnose →"}
+            {hasError ? t(s.ctaRescan, lang) : t(s.ctaScan, lang)}
           </Button>
         </Link>
       </div>

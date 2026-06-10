@@ -5,17 +5,17 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-brand text-white hover:bg-brand-hover active:bg-brand-active",
+  primary: "bg-ink text-white hover:bg-brand active:bg-brand-active",
   secondary:
-    "bg-white border border-grey-300 text-grey-900 hover:bg-grey-50",
-  ghost: "bg-transparent text-grey-700 hover:bg-grey-100",
-  danger: "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100",
+    "bg-white border border-line text-ink hover:bg-surface-2",
+  ghost: "bg-transparent text-ink hover:bg-surface-2",
+  danger: "bg-white text-red-600 border border-red-200 hover:bg-red-50 hover:border-red-300",
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: "h-8 px-3 text-sm rounded-md",
-  md: "h-10 px-4 text-base rounded-md",
-  lg: "h-12 px-6 text-[17px] rounded-lg",
+  sm: "h-9 px-4 text-sm rounded-full",
+  md: "h-11 px-5 text-[15px] rounded-full",
+  lg: "h-12 px-6 text-base rounded-full",
 };
 
 export interface ButtonProps

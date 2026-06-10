@@ -25,28 +25,31 @@ export function AppShell({
   const router = useRouter();
 
   return (
-    <div className="h-full" style={{ background: "#1A0005" }}>
-      <div className="mx-auto flex h-full w-full max-w-lg flex-col bg-grey-50">
+    <div className="relative h-full" style={{ background: "#F3F2EE" }}>
+      <div className="app-mesh" aria-hidden="true" />
+      <div className="relative mx-auto flex h-full w-full max-w-lg flex-col">
         {title !== undefined && (
-          <header className="sticky top-0 z-30 flex h-14 items-center gap-3 px-4" style={{ background: "#1A0005" }}>
+          <header className="glass-nav sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-black/[0.06] px-4">
             {back && (
               <button
                 type="button"
                 aria-label="Back"
                 onClick={() => (backHref ? router.push(backHref) : router.back())}
-                className="-ml-1 flex h-9 w-9 items-center justify-center rounded-md text-white/80 hover:bg-white/10"
+                className="-ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-ink/70 transition-colors hover:bg-black/[0.05]"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
-            <div className="flex-1 truncate text-base font-semibold text-white">
+            <div className="flex-1 truncate text-base font-semibold text-ink">
               {title}
             </div>
-            {right && <div className="text-white/80">{right}</div>}
+            {right && <div className="text-ink-muted">{right}</div>}
           </header>
         )}
 
-        <main className={cn("flex-1 min-h-0", contentClassName)}>{children}</main>
+        <main className={cn("flex-1 min-h-0", contentClassName ?? "overflow-y-auto")}>
+          {children}
+        </main>
 
         {!hideBottomNav && <BottomNav />}
       </div>

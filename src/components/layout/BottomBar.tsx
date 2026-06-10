@@ -9,8 +9,8 @@ export function BottomBar({
   className?: string;
 }) {
   return (
-    <div className="sticky bottom-0 z-30 mt-auto border-t border-grey-200 bg-white/95 backdrop-blur">
-      <div className={cn("px-4 py-3", className)}>{children}</div>
+    <div className="cta-footer sticky bottom-0 z-30 mt-auto">
+      <div className={cn("px-4 pt-3", className)}>{children}</div>
     </div>
   );
 }

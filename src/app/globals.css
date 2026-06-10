@@ -1,36 +1,50 @@
 @import "tailwindcss";
 
 /* ============================================================
-   MachineWhisperer — Design Tokens (Tailwind v4 @theme)
-   All colors registered here so utility classes resolve to
-   these tokens. No hardcoded hex in components.
+   ShiftAssist — Tracka "Berlin Glass" design language
+   Light theme · orange #FF5A2F accent · frosted glass over mesh.
+   All colour is token-driven (Tailwind v4 @theme) so every
+   screen re-skins from here. No hardcoded hex in components.
    ============================================================ */
 
 @theme {
   /* === FONTS === */
-  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-sans: "Satoshi", var(--font-dm-sans), "Helvetica Neue", system-ui, sans-serif;
   --font-mono: var(--font-dm-mono), monospace;
 
-  /* === BOSCH RED === */
-  --color-red-50:  #FFF0F0;
-  --color-red-100: #FFD6D6;
-  --color-red-200: #FFB3B3;
-  --color-red-500: #E20015;
-  --color-red-600: #C20012;
-  --color-red-700: #9A000E;
+  /* === BRAND — Bosch red (the single accent) === */
+  --color-brand:        #E20015;
+  --color-brand-hover:  #C20012;
+  --color-brand-active: #9A000E;
 
-  /* === NEUTRALS (grey) === */
-  --color-grey-50:  #F7F7F7;
-  --color-grey-100: #EFEFEF;
-  --color-grey-200: #D9D9D9;
-  --color-grey-300: #BDBDBD;
-  --color-grey-400: #9E9E9E;
-  --color-grey-500: #757575;
-  --color-grey-600: #5C5C5C;
-  --color-grey-700: #3D3D3D;
-  --color-grey-800: #2A2A2A;
-  --color-grey-900: #1A1A1A;
+  /* === INK / SEMANTIC NEUTRALS (warm, Tracka) === */
+  --color-ink:        #151515;
+  --color-ink-2:      #2A2A2A;
+  --color-ink-muted:  #4A4A4A;
+  --color-surface:    #FFFFFF;
+  --color-surface-2:  #ECEAE3;
+  --color-line:       #C9C5BB;
+
+  /* === NEUTRAL RAMP (warm) — legacy grey-* utilities remap here === */
+  --color-grey-50:  #F3F2EE;
+  --color-grey-100: #ECEAE3;
+  --color-grey-200: #E2DFD7;
+  --color-grey-300: #CBC7BC;
+  --color-grey-400: #8E8A81;
+  --color-grey-500: #57544E;
+  --color-grey-600: #45423C;
+  --color-grey-700: #34322D;
+  --color-grey-800: #24221F;
+  --color-grey-900: #151515;
   --color-white:    #FFFFFF;
+
+  /* === DANGER (Tracka red) === */
+  --color-red-50:  #FEF2F2;
+  --color-red-100: #FEE2E2;
+  --color-red-200: #FECACA;
+  --color-red-500: #EF4444;
+  --color-red-600: #DC2626;
+  --color-red-700: #B91C1C;
 
   /* === AMBER (warning) === */
   --color-amber-50:  #FFF8E6;
@@ -63,28 +77,129 @@
   --color-purple-600: #9333EA;
   --color-purple-700: #7E22CE;
 
-  /* === BRAND (semantic) === */
-  --color-brand:        #E20015;
-  --color-brand-hover:  #C20012;
-  --color-brand-active: #9A000E;
-
   /* === RADIUS === */
-  --radius-sm:   4px;
+  --radius-sm:   6px;
   --radius-md:   8px;
   --radius-lg:   12px;
   --radius-xl:   16px;
+  --radius-2xl:  20px;
   --radius-full: 9999px;
 
   /* === ANIMATION === */
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:     cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 body {
   background: var(--color-grey-50);
-  color: var(--color-grey-900);
+  color: var(--color-ink);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+::selection { background: var(--color-brand); color: #fff; }
+
+/* ============================================================
+   Berlin Glass — surfaces
+   ============================================================ */
+.glass-card {
+  background: rgb(255 255 255 / 0.85);
+  border: 1px solid rgb(0 0 0 / 0.06);
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.65),
+    0 1px 2px rgb(21 21 21 / 0.04),
+    0 12px 28px -12px rgb(21 21 21 / 0.14);
+}
+.glass-nav {
+  background: rgb(255 255 255 / 0.80);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+
+/* Pinned bottom action bar — frosted, elevated, safe-area aware.
+   Used by every screen footer that holds a primary CTA. */
+.cta-footer {
+  background: rgb(255 255 255 / 0.82);
+  border-top: 1px solid rgb(0 0 0 / 0.06);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 -8px 24px -16px rgb(21 21 21 / 0.18);
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
+}
+
+/* ============================================================
+   Berlin Glass — editorial typography scale
+   ============================================================ */
+.eyebrow-mono {
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--color-ink-muted);
+}
+.display-1 {
+  font-size: 40px;
+  line-height: 1.04;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.heading-1 {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.heading-2 {
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+/* ============================================================
+   Animated brand mesh — sits behind the app (z -10)
+   ============================================================ */
+.app-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(180deg, #F6F4F0 0%, #F1EFE9 100%);
+}
+.app-mesh::before,
+.app-mesh::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  will-change: transform;
+}
+.app-mesh::before {
+  width: 70%; height: 50%;
+  top: -12%; left: -18%;
+  background: rgb(226 0 21 / 0.15);
+  animation: mesh-drift-a 28s var(--ease-out) infinite alternate;
+}
+.app-mesh::after {
+  width: 75%; height: 55%;
+  bottom: -16%; right: -20%;
+  background: rgb(226 0 21 / 0.09);
+  animation: mesh-drift-b 34s var(--ease-out) infinite alternate;
+}
+@keyframes mesh-drift-a { to { transform: translate3d(8%, 6%, 0) scale(1.15); } }
+@keyframes mesh-drift-b { to { transform: translate3d(-6%, -7%, 0) scale(1.12); } }
+
+/* ============================================================
+   Motion
+   ============================================================ */
 /* Pulsing dot for CRITICAL severity */
 @keyframes mw-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -92,4 +207,9 @@ body {
 }
 .mw-pulse {
   animation: mw-pulse 2s var(--ease-default) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-mesh::before, .app-mesh::after { animation: none; }
+  .mw-pulse { animation: none; }
 }

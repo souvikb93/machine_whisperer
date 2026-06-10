@@ -8,15 +8,19 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { useDowntimeCounter } from "@/hooks/useDowntimeCounter";
 import { getIssueById } from "@/lib/mockData";
+import { STRINGS, MOCK_CONTENT, t } from "@/lib/i18n";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { NotFoundScreen } from "./NotFoundScreen";
 import type { Cause, Source } from "@/lib/types";
 
-function sourceLabel(s: Source): { icon: React.ElementType; label: string } {
-  if (s.type === "manual") return { icon: BookOpen, label: "OEM Manual" };
-  if (s.type === "shiftbook") return { icon: ClipboardList, label: "Shift Log" };
-  if (s.type === "log") return { icon: FileText, label: "Maintenance Log" };
-  return { icon: ClipboardList, label: "Shift Log" };
+function sourceLabel(s: Source, lang: "en" | "de"): { icon: React.ElementType; label: string } {
+  const sd = STRINGS.diagnose;
+  if (s.type === "manual")   return { icon: BookOpen,     label: t(sd.oemManual, lang) };
+  if (s.type === "shiftbook")return { icon: ClipboardList,label: t(sd.shiftLog, lang) };
+  if (s.type === "log")      return { icon: FileText,     label: t(sd.maintLog, lang) };
+  if (s.type === "plant")    return { icon: ClipboardList,label: t(sd.plantLog, lang) };
+  return { icon: ClipboardList, label: t(sd.shiftLog, lang) };
 }
 
 function probabilityClasses(p: number) {
@@ -27,17 +31,25 @@ function probabilityClasses(p: number) {
 
 function CauseCard({
   cause,
+  localTitle,
+  localDescription,
   selected,
   onSelect,
+  lang,
 }: {
   cause: Cause;
+  localTitle: string;
+  localDescription: string;
   selected: boolean;
   onSelect: () => void;
+  lang: "en" | "de";
 }) {
   const primarySource = cause.sources[0];
   const { icon: SrcIcon, label: srcLabel } = primarySource
-    ? sourceLabel(primarySource)
+    ? sourceLabel(primarySource, lang)
     : { icon: FileText, label: "Source" };
+
+  const sd = STRINGS.diagnose;
 
   return (
     <button
@@ -78,14 +90,14 @@ function CauseCard({
 
       {/* Title + description */}
       <div className="mt-3">
-        <h3 className="font-semibold text-grey-900">{cause.title}</h3>
-        <p className="mt-1 text-sm text-grey-500">{cause.description}</p>
+        <h3 className="font-semibold text-grey-900">{localTitle}</h3>
+        <p className="mt-1 text-sm text-grey-500">{localDescription}</p>
       </div>
 
       {/* Time + difficulty */}
       <div className="mt-3 flex items-center gap-4 text-xs text-grey-400">
         <span className="inline-flex items-center gap-1">
-          <Clock className="h-3.5 w-3.5" /> {cause.estMinutes} min
+          <Clock className="h-3.5 w-3.5" /> {cause.estMinutes} {t(sd.min, lang)}
         </span>
         <span className="inline-flex items-center gap-1 capitalize">
           <Wrench className="h-3.5 w-3.5" /> {cause.difficulty}
@@ -98,6 +110,8 @@ function CauseCard({
 export function DiagnoseScreen() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { lang } = useLanguage();
+  const s = STRINGS.diagnose;
   const issue = getIssueById(id);
   const live = useDowntimeCounter(
     issue?.stoppedAt ?? new Date(),
@@ -108,6 +122,17 @@ export function DiagnoseScreen() {
   if (!issue) return <NotFoundScreen />;
   const causes = issue.causes ?? [];
 
+  // Pull localised content for this issue
+  const issueContent = MOCK_CONTENT[issue.id as keyof typeof MOCK_CONTENT];
+  const causesContent = issueContent && "causes" in issueContent
+    ? (issueContent as unknown as { causes: Record<string, { title: { en: string; de: string }; description: { en: string; de: string } }> }).causes
+    : null;
+
+  function getLocalCause(causeId: string) {
+    if (!causesContent || !(causeId in causesContent)) return null;
+    return causesContent[causeId];
+  }
+
   function startFix() {
     if (selected === null) return;
     router.push(`/fix/${issue!.id}/${selected}/1`);
@@ -115,7 +140,7 @@ export function DiagnoseScreen() {
 
   return (
     <AppShell
-      title="Diagnosis"
+      title={t(s.title, lang)}
       back
       backHref={`/alert/${issue.id}`}
       hideBottomNav
@@ -130,43 +155,52 @@ export function DiagnoseScreen() {
         {/* Context strip */}
         <div className="flex items-center justify-between">
           <span className="text-sm text-grey-600">
-            {issue.machine.id} · {issue.machine.line} · Station {issue.machine.station}
+            {issue.machine.id} · {issue.machine.line} · {t(s.station, lang)} {issue.machine.station}
           </span>
           <span className="font-mono text-sm text-red-600">{live.formatted}</span>
         </div>
 
         <p className="text-xs text-grey-400">
-          Select the most likely root cause to begin the fix.
+          {t(s.subtitle, lang)}
         </p>
 
         {/* Cause cards */}
         <div className="flex flex-col gap-3">
-          {causes.map((cause, idx) => (
-            <motion.div
-              key={cause.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22, delay: idx * 0.07 }}
-            >
-              <CauseCard
-                cause={cause}
-                selected={selected === idx}
-                onSelect={() => setSelected(idx)}
-              />
-            </motion.div>
-          ))}
+          {causes.map((cause, idx) => {
+            const local = getLocalCause(cause.id);
+            const localTitle       = local ? t(local.title, lang)       : cause.title;
+            const localDescription = local ? t(local.description, lang) : cause.description;
+
+            return (
+              <motion.div
+                key={cause.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, delay: idx * 0.07 }}
+              >
+                <CauseCard
+                  cause={cause}
+                  localTitle={localTitle}
+                  localDescription={localDescription}
+                  selected={selected === idx}
+                  onSelect={() => setSelected(idx)}
+                  lang={lang}
+                />
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Sticky footer — outside scroll area so it always anchors to bottom */}
-      <div className="shrink-0 border-t border-grey-200 bg-white px-4 py-3">
+      {/* Sticky footer */}
+      <div className="cta-footer shrink-0 px-4 pt-3">
         <Button
           size="lg"
           className="w-full"
           disabled={selected === null}
           onClick={startFix}
         >
-          Start Fix →
+          {t(s.startFix, lang)}
         </Button>
       </div>
     </AppShell>

@@ -8,29 +8,25 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { setScanResult } from "@/lib/scanStore";
+import { STRINGS, t } from "@/lib/i18n";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 const MOCK_RESULT = {
   machine: "CNC-05",
   issueId: "issue-001",
   errorCode: "E-104",
-  errorText: "Tool Failure – Replace Drill Bit",
   confidence: 94,
   supplier: {
     name: "DMG MORI AG",
     country: "Germany",
     partNumber: "DMU50-DRILL-D12",
-    warranty: "Active · until Mar 2027",
+    warrantyEn: "Active · until Mar 2027",
+    warrantyDe: "Aktiv · bis März 2027",
     phone: "+49 7461 86-0",
     email: "service@dmgmori.com",
   },
 };
-
-const CHECKS = [
-  "OEM Manual",
-  "Shift Book (12 entries)",
-  "Maintenance Logs",
-];
 
 type EditableField = "machine" | "errorCode" | "errorText";
 
@@ -99,32 +95,41 @@ function EditableRow({
 
 export function GenericScanScreen() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const s = STRINGS.scan;
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<typeof MOCK_RESULT | null>(null);
-  const [edits, setEdits] = useState<Pick<typeof MOCK_RESULT, EditableField>>({
+  const [edits, setEdits] = useState<Record<EditableField, string>>({
     machine: MOCK_RESULT.machine,
     errorCode: MOCK_RESULT.errorCode,
-    errorText: MOCK_RESULT.errorText,
+    errorText: t(s.errorText, lang),
   });
   const [diagnosing, setDiagnosing] = useState(false);
   const [checkedCount, setCheckedCount] = useState(0);
+
+  const CHECKS = [
+    t(s.checkOem, lang),
+    t(s.checkShift, lang),
+    t(s.checkMaint, lang),
+  ];
 
   useEffect(() => {
     let active = true;
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: { ideal: "environment" } } })
-      .then((s) => {
-        if (!active) { s.getTracks().forEach((t) => t.stop()); return; }
+      .then((stream) => {
+        if (!active) { stream.getTracks().forEach((tk) => tk.stop()); return; }
         if (videoRef.current) {
-          videoRef.current.srcObject = s;
+          videoRef.current.srcObject = stream;
           videoRef.current.play().catch(() => {});
         }
       })
       .catch((e) => {
-        if (active) setCameraError(e.message ?? "Camera unavailable");
+        if (active) setCameraError(e.message ?? t(s.cameraUnavail, lang));
       });
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -141,9 +146,12 @@ export function GenericScanScreen() {
     }
     setTimeout(() => {
       setScanning(false);
-      const r = MOCK_RESULT;
-      setResult(r);
-      setEdits({ machine: r.machine, errorCode: r.errorCode, errorText: r.errorText });
+      setResult(MOCK_RESULT);
+      setEdits({
+        machine: MOCK_RESULT.machine,
+        errorCode: MOCK_RESULT.errorCode,
+        errorText: t(s.errorText, lang),
+      });
     }, 1200);
   }
 
@@ -167,13 +175,13 @@ export function GenericScanScreen() {
   }
 
   return (
-    <AppShell title="Scan HMI" back backHref="/dashboard" hideBottomNav contentClassName="flex flex-col">
+    <AppShell title={t(s.title, lang)} back backHref="/dashboard" hideBottomNav contentClassName="flex flex-col">
       {/* Edge-to-edge camera */}
       <div className="relative flex-1 min-h-0 w-full overflow-hidden bg-black">
         {cameraError ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-white/50">
             <VideoOff className="h-10 w-10" />
-            <span className="text-sm">Camera unavailable</span>
+            <span className="text-sm">{t(s.cameraUnavail, lang)}</span>
             <span className="text-xs opacity-60">{cameraError}</span>
           </div>
         ) : (
@@ -198,16 +206,16 @@ export function GenericScanScreen() {
           </div>
           {!cameraError && !scanning && !result && (
             <p className="mt-4 rounded-full bg-black/40 px-4 py-1.5 text-center text-xs text-white/80 backdrop-blur-sm">
-              Align HMI screen within the frame
+              {t(s.alignPrompt, lang)}
             </p>
           )}
         </div>
       </div>
 
       {/* Sticky CTA */}
-      <div className="sticky bottom-0 border-t border-grey-200 bg-white px-4 py-3">
+      <div className="cta-footer sticky bottom-0 px-4 pt-3">
         <Button size="lg" className="w-full" onClick={capture} disabled={scanning}>
-          {scanning ? "Scanning…" : "Scan HMI for Diagnosis"}
+          {scanning ? t(s.scanning, lang) : t(s.ctaScan, lang)}
         </Button>
       </div>
 
@@ -223,9 +231,9 @@ export function GenericScanScreen() {
             <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-brand/10">
               <span className="h-8 w-8 animate-spin rounded-full border-4 border-grey-200 border-t-brand" />
             </div>
-            <h2 className="mb-1 text-lg font-bold text-grey-900">Preparing Diagnosis</h2>
-            <p className="mb-8 text-sm text-grey-400">Pulling context from all sources…</p>
-            <div className="flex flex-col gap-5 w-full max-w-xs">
+            <h2 className="mb-1 text-lg font-bold text-grey-900">{t(s.preparing, lang)}</h2>
+            <p className="mb-8 text-sm text-grey-400">{t(s.pulling, lang)}</p>
+            <div className="flex flex-col gap-5 w-fit">
               {CHECKS.map((label, i) => {
                 const done = checkedCount > i;
                 const active = checkedCount === i;
@@ -282,25 +290,27 @@ export function GenericScanScreen() {
               <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-grey-200" />
 
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-grey-900">Machine Detected</h2>
-                <span className="text-sm font-medium text-green-600">{result.confidence}% confident</span>
+                <h2 className="text-base font-semibold text-grey-900">{t(s.machineDetected, lang)}</h2>
+                <span className="text-sm font-medium text-green-600">
+                  {result.confidence}{t(s.confident, lang)}
+                </span>
               </div>
               <Progress value={result.confidence} className="mt-2" fillClassName="bg-green-500" />
 
               {/* Editable error info */}
               <div className="mt-4 divide-y divide-grey-100 rounded-lg border border-grey-100">
                 <EditableRow
-                  label="Machine"
+                  label={t(s.fieldMachine, lang)}
                   value={edits.machine}
                   onChange={(v) => setEdits((p) => ({ ...p, machine: v }))}
                 />
                 <EditableRow
-                  label="Error Code"
+                  label={t(s.fieldErrorCode, lang)}
                   value={edits.errorCode}
                   onChange={(v) => setEdits((p) => ({ ...p, errorCode: v }))}
                 />
                 <EditableRow
-                  label="Error Text"
+                  label={t(s.fieldErrorText, lang)}
                   value={edits.errorText}
                   onChange={(v) => setEdits((p) => ({ ...p, errorText: v }))}
                 />
@@ -311,11 +321,13 @@ export function GenericScanScreen() {
                 <div className="flex items-center justify-between px-3 py-2.5">
                   <div>
                     <p className="text-xs font-semibold text-grey-900">{result.supplier.name}</p>
-                    <p className="text-[11px] text-grey-400">{result.supplier.country} · Part: {result.supplier.partNumber}</p>
+                    <p className="text-[11px] text-grey-400">
+                      {result.supplier.country} · Part: {result.supplier.partNumber}
+                    </p>
                   </div>
                   <span className="flex items-center gap-1 text-[11px] font-medium text-green-600">
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    {result.supplier.warranty}
+                    {lang === "de" ? result.supplier.warrantyDe : result.supplier.warrantyEn}
                   </span>
                 </div>
                 <a href={`tel:${result.supplier.phone}`} className="flex items-center gap-2 px-3 py-2.5 text-xs text-blue-600">
@@ -327,7 +339,7 @@ export function GenericScanScreen() {
               </div>
 
               <Button size="lg" className="mt-4 w-full" onClick={confirm}>
-                Start Diagnosis →
+                {t(s.ctaStart, lang)}
               </Button>
             </motion.div>
           </>

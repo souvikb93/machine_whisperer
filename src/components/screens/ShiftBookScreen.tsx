@@ -15,6 +15,8 @@ import { BottomBar } from "@/components/layout/BottomBar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getIssueById } from "@/lib/mockData";
+import { STRINGS, t } from "@/lib/i18n";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { NotFoundScreen } from "./NotFoundScreen";
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -28,13 +30,15 @@ function Row({ label, value }: { label: string; value: string }) {
 
 export function ShiftBookScreen() {
   const { id } = useParams<{ id: string }>();
+  const { lang } = useLanguage();
+  const s = STRINGS.shiftbook;
   const issue = getIssueById(id);
   if (!issue) return <NotFoundScreen />;
   const { machine } = issue;
 
   return (
     <AppShell
-      title="Shift Book"
+      title={t(s.title, lang)}
       back
       backHref={`/capture/${issue.id}`}
       right={
@@ -48,7 +52,7 @@ export function ShiftBookScreen() {
         <div className="flex items-center gap-2 border-b border-green-100 bg-green-50 px-4 py-3">
           <CheckCircle2 className="h-5 w-5 text-green-600" />
           <span className="text-sm font-semibold text-green-700">
-            Entry Published · Shared with Morning Shift
+            {t(s.published, lang)}
           </span>
         </div>
 
@@ -57,7 +61,7 @@ export function ShiftBookScreen() {
           <Card className="rounded-xl p-5">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-semibold text-grey-900">
-                Incident Report
+                {t(s.incidentReport, lang)}
               </h2>
               <span className="text-xs text-grey-500">
                 09 Jun 2026 · 12:04 PM
@@ -65,18 +69,18 @@ export function ShiftBookScreen() {
             </div>
             <div className="divide-y divide-grey-100">
               <Row
-                label="Incident"
+                label={t(s.incident, lang)}
                 value={`${issue.errorCode} · ${machine.id} · ${machine.line} · ${machine.station}`}
               />
-              <Row label="Root Cause" value="Spindle cooling fan blocked by dust" />
-              <Row label="Resolution" value="Cleaned fan with compressed air" />
-              <Row label="Fix Time" value="18 minutes" />
-              <Row label="Technician" value={issue.technicianName} />
+              <Row label={t(s.rootCause, lang)}  value={t(s.rootCauseValue, lang)} />
+              <Row label={t(s.resolution, lang)} value={t(s.resolutionValue, lang)} />
+              <Row label={t(s.fixTime, lang)}    value={t(s.fixTimeValue, lang)} />
+              <Row label={t(s.technician, lang)} value={issue.technicianName} />
             </div>
 
             {/* Photos */}
             <div className="mt-4 grid grid-cols-2 gap-3">
-              {["Before", "After"].map((l) => (
+              {[t(s.before, lang), t(s.after, lang)].map((l) => (
                 <div
                   key={l}
                   className="flex h-24 flex-col items-center justify-center gap-1 rounded-lg bg-grey-100 text-grey-400"
@@ -89,15 +93,14 @@ export function ShiftBookScreen() {
 
             {/* Note */}
             <p className="mt-4 rounded-md bg-grey-50 p-3 text-sm italic text-grey-600">
-              &ldquo;E-104 indicated drill bit failure but actual cause was dust
-              blocking the spindle cooling fan.&rdquo;
+              {t(s.entryNote, lang)}
             </p>
           </Card>
 
           {/* Linked knowledge */}
           <div>
             <h3 className="mb-2 text-sm font-medium text-grey-700">
-              Knowledge linked
+              {t(s.knowledgeLinked, lang)}
             </h3>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-grey-700">
@@ -106,11 +109,11 @@ export function ShiftBookScreen() {
               </div>
               <div className="flex items-center gap-2 text-sm text-grey-700">
                 <Link2 className="h-4 w-4 text-grey-400" />
-                Similar: Plant Hamburg · Klaus W. · Feb 2025
+                {lang === "de" ? "Ähnlich: Werk Hamburg · Klaus W. · Feb 2025" : "Similar: Plant Hamburg · Klaus W. · Feb 2025"}
               </div>
               <div className="flex items-center gap-2 text-sm text-grey-700">
                 <Link2 className="h-4 w-4 text-grey-400" />
-                Similar: Plant Munich · Nov 2024
+                {lang === "de" ? "Ähnlich: Werk München · Nov 2024" : "Similar: Plant Munich · Nov 2024"}
               </div>
             </div>
           </div>
@@ -118,24 +121,16 @@ export function ShiftBookScreen() {
           {/* AI knowledge graph */}
           <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
             <div className="mb-1 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700">
-              <Sparkles className="h-4 w-4" /> Knowledge graph updated
+              <Sparkles className="h-4 w-4" /> {t(s.kgUpdated, lang)}
             </div>
-            <p className="text-sm text-blue-800">
-              E-104 + CNC-series → Cooling fan blockage now ranked #2 cause (was
-              #3).
-            </p>
-            <p className="mt-1 text-sm text-blue-800">
-              Future technicians will see this fix first when probability
-              matches.
-            </p>
+            <p className="text-sm text-blue-800">{t(s.kgBody1, lang)}</p>
+            <p className="mt-1 text-sm text-blue-800">{t(s.kgBody2, lang)}</p>
           </div>
 
           {/* Savings summary */}
           <div className="rounded-lg bg-green-50 p-4 text-green-700">
-            <p className="text-sm font-medium">This fix saved: €1,340 · 47 min</p>
-            <p className="mt-0.5 text-sm">
-              Today&apos;s shift total: €4,200 saved · 7 issues resolved
-            </p>
+            <p className="text-sm font-medium">{t(s.savedSummary, lang)} €1,340 · 47 min</p>
+            <p className="mt-0.5 text-sm">{t(s.shiftTotal, lang)}</p>
           </div>
         </div>
       </div>
@@ -143,11 +138,11 @@ export function ShiftBookScreen() {
       <BottomBar>
         <div className="space-y-2">
           <Button variant="secondary" size="lg" className="w-full">
-            Share with team
+            {t(s.shareTeam, lang)}
           </Button>
           <Link href="/dashboard" className="block">
             <Button variant="ghost" size="lg" className="w-full">
-              Back to Dashboard
+              {t(s.backDashboard, lang)}
             </Button>
           </Link>
         </div>

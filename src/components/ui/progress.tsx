@@ -10,7 +10,7 @@ export function Progress({ value, className, fillClassName }: ProgressProps) {
   return (
     <div
       className={cn(
-        "w-full bg-grey-100 rounded-full h-1.5 overflow-hidden",
+        "w-full bg-surface-2 rounded-full h-1.5 overflow-hidden",
         className,
       )}
     >
