@@ -39,45 +39,45 @@ export function MachineCard({ issue }: { issue: Issue }) {
     <Link
       href={`/alert/${issue.id}`}
       className={cn(
-        "block rounded-lg border border-grey-200 border-l-4 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-px",
+        "block rounded-lg border border-l-4 glass-card p-4 transition-all duration-200 hover:brightness-110 hover:-translate-y-px",
         ACCENT[accentKey] ?? "border-l-grey-300",
         isResolved && "opacity-70",
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <span className="text-lg font-bold text-grey-900">{machine.id}</span>
-          <span className="ml-2 text-sm text-grey-400">{machine.type}</span>
+          <span className="text-lg font-bold text-white">{machine.id}</span>
+          <span className="ml-2 text-sm text-text-2">{machine.type}</span>
         </div>
         <SeverityBadge kind={badgeKind} />
       </div>
 
-      <p className="mt-0.5 text-sm text-grey-500">
+      <p className="mt-0.5 text-sm text-text-2">
         {machine.hall} · {machine.line} · Station {machine.station}
       </p>
 
       {errorCode ? (
-        <p className="mt-2.5 text-sm font-medium text-grey-800">
+        <p className="mt-2.5 text-sm font-medium text-white">
           {errorCode} · {errorText}
         </p>
       ) : (
-        <p className="mt-2.5 inline-flex items-center gap-1 text-xs text-grey-400">
+        <p className="mt-2.5 inline-flex items-center gap-1 text-xs text-text-2">
           <ScanLine className="h-3.5 w-3.5" />
           Scan HMI to get error code
         </p>
       )}
 
-      <div className="mt-3 flex items-center gap-1.5 text-sm text-grey-500">
+      <div className="mt-3 flex items-center gap-1.5 text-sm text-text-2">
         <Clock className="h-3.5 w-3.5 shrink-0" />
         <span>{elapsedLabel} ·</span>
         <span
           className={cn(
             "font-medium",
             isResolved
-              ? "text-green-600"
+              ? "text-green-400"
               : severity === "critical"
-                ? "text-red-600"
-                : "text-amber-700",
+                ? "text-red-500"
+                : "text-amber-400",
           )}
         >
           {lossLabel}

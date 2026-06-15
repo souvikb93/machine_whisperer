@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Clock, Wrench, BookOpen, FileText, ClipboardList } from "lucide-react";
+import { Clock, Wrench, BookOpen, FileText, ClipboardList, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { useDowntimeCounter } from "@/hooks/useDowntimeCounter";
 import { getIssueById } from "@/lib/mockData";
+import { getScanResult } from "@/lib/scanStore";
 import { STRINGS, MOCK_CONTENT, t } from "@/lib/i18n";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -24,9 +25,9 @@ function sourceLabel(s: Source, lang: "en" | "de"): { icon: React.ElementType; l
 }
 
 function probabilityClasses(p: number) {
-  if (p >= 50) return "bg-green-50 text-green-700 border-green-200";
-  if (p >= 20) return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-red-50 text-red-600 border-red-200";
+  if (p >= 50) return "bg-green-100 text-green-400 border-green-700/40";
+  if (p >= 20) return "bg-amber-100 text-amber-400 border-amber-200";
+  return "bg-red-100 text-red-500 border-red-200";
 }
 
 function CauseCard({
@@ -56,10 +57,11 @@ function CauseCard({
       type="button"
       onClick={onSelect}
       className={cn(
-        "w-full rounded-xl border-2 bg-white p-4 text-left shadow-sm transition-all duration-200",
+        "w-full rounded-xl border-2 p-4 text-left transition-all duration-200",
+        "bg-surface border-border",
         selected
-          ? "border-brand bg-brand/5 shadow-md"
-          : "border-grey-200 hover:border-grey-300",
+          ? "border-brand brightness-110 shadow-lg shadow-brand/20"
+          : "hover:border-border-strong",
       )}
     >
       {/* Top row: combined pill + radio */}
@@ -90,12 +92,12 @@ function CauseCard({
 
       {/* Title + description */}
       <div className="mt-3">
-        <h3 className="font-semibold text-grey-900">{localTitle}</h3>
-        <p className="mt-1 text-sm text-grey-500">{localDescription}</p>
+        <h3 className="font-semibold text-white">{localTitle}</h3>
+        <p className="mt-1 text-sm text-text-2">{localDescription}</p>
       </div>
 
       {/* Time + difficulty */}
-      <div className="mt-3 flex items-center gap-4 text-xs text-grey-400">
+      <div className="mt-3 flex items-center gap-4 text-xs text-text-2">
         <span className="inline-flex items-center gap-1">
           <Clock className="h-3.5 w-3.5" /> {cause.estMinutes} {t(sd.min, lang)}
         </span>
@@ -118,9 +120,32 @@ export function DiagnoseScreen() {
     issue?.machine.costPerMinute ?? 0,
   );
   const [selected, setSelected] = useState<number | null>(null);
+  const [aiCauses, setAiCauses] = useState<Cause[] | null>(null);
+  const [loadingAI, setLoadingAI] = useState(true);
+
+  useEffect(() => {
+    const scanResult = getScanResult(id);
+    const errorCode = scanResult?.errorCode ?? issue?.errorCode ?? "UNKNOWN";
+    const errorText = scanResult?.errorText ?? issue?.errorText ?? "";
+
+    fetch("/api/recommendations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ errorCode, errorText }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data.causes) && data.causes.length > 0) {
+          setAiCauses(data.causes as Cause[]);
+          localStorage.setItem(`mw_ai_causes_${id}`, JSON.stringify(data.causes));
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingAI(false));
+  }, [id, issue?.errorCode, issue?.errorText]);
 
   if (!issue) return <NotFoundScreen />;
-  const causes = issue.causes ?? [];
+  const causes = aiCauses ?? issue.causes ?? [];
 
   // Pull localised content for this issue
   const issueContent = MOCK_CONTENT[issue.id as keyof typeof MOCK_CONTENT];
@@ -146,7 +171,7 @@ export function DiagnoseScreen() {
       hideBottomNav
       contentClassName="flex flex-col"
       right={
-        <span className="rounded-md bg-grey-100 px-2 py-1 text-xs font-semibold text-grey-700">
+        <span className="rounded-md bg-surface-2 px-2 py-1 text-xs font-semibold text-white">
           {issue.machine.id}
         </span>
       }
@@ -154,15 +179,23 @@ export function DiagnoseScreen() {
       <div className="flex-1 space-y-4 px-4 pb-4 pt-4 overflow-y-auto">
         {/* Context strip */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-grey-600">
+          <span className="text-sm text-text-2">
             {issue.machine.id} · {issue.machine.line} · {t(s.station, lang)} {issue.machine.station}
           </span>
           <span className="font-mono text-sm text-red-600">{live.formatted}</span>
         </div>
 
-        <p className="text-xs text-grey-400">
+        <p className="text-xs text-text-2">
           {t(s.subtitle, lang)}
         </p>
+
+        {/* AI loading state */}
+        {loadingAI && causes.length === 0 && (
+          <div className="flex flex-col items-center gap-3 py-10">
+            <Loader2 className="h-7 w-7 animate-spin text-brand" />
+            <p className="text-sm text-text-2">Analysing with AI…</p>
+          </div>
+        )}
 
         {/* Cause cards */}
         <div className="flex flex-col gap-3">

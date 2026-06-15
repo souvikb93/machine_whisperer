@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Clock, Euro, CheckCircle2, BookOpen, Menu } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { IconButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -73,8 +74,8 @@ export function DashboardScreen() {
 
   const METRICS = [
     { key: "timeSaved" as const,  label: t(s.timeSaved, lang),  icon: Clock,        iconClass: "text-brand",      tint: "bg-brand/10" },
-    { key: "costSaved" as const,  label: t(s.costSaved, lang),  icon: Euro,         iconClass: "text-green-600",  tint: "bg-green-500/10" },
-    { key: "resolved" as const,   label: t(s.resolved, lang),   icon: CheckCircle2, iconClass: "text-blue-500",   tint: "bg-blue-500/10" },
+    { key: "costSaved" as const,  label: t(s.costSaved, lang),  icon: Euro,         iconClass: "text-green-400",  tint: "bg-green-500/10" },
+    { key: "resolved" as const,   label: t(s.resolved, lang),   icon: CheckCircle2, iconClass: "text-navy-400",   tint: "bg-navy-400/10" },
     { key: "fixGuides" as const,  label: t(s.fixGuides, lang),  icon: BookOpen,     iconClass: "text-purple-500", tint: "bg-purple-500/10" },
   ];
 
@@ -83,21 +84,16 @@ export function DashboardScreen() {
       title={
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand shadow-[0_2px_10px_-2px_rgba(226,0,21,0.55)]">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M11.5 2L5 11h6l-2.5 7L17 9h-6l.5-7z" fill="white" strokeLinejoin="round"/>
-            </svg>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/bosch.svg" alt="Bosch" className="h-5 w-5 invert" />
           </div>
-          <p className="text-lg font-bold tracking-tight text-ink">ShiftAssist</p>
+          <p className="text-lg font-bold tracking-tight text-white">ShiftAssist</p>
         </div>
       }
       right={
-        <button
-          type="button"
-          aria-label="Menu"
-          className="-mr-1 flex h-9 w-9 items-center justify-center rounded-lg text-ink transition-colors hover:bg-black/[0.05]"
-        >
+        <IconButton aria-label="Menu" className="-mr-1">
           <Menu className="h-5 w-5" />
-        </button>
+        </IconButton>
       }
     >
       <div className="space-y-4 px-4 pb-8 pt-4">
@@ -111,8 +107,8 @@ export function DashboardScreen() {
               className={cn(
                 "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 periodIdx === i
-                  ? "bg-grey-900 text-white"
-                  : "bg-grey-100 text-grey-500 hover:bg-grey-200",
+                  ? "bg-brand text-white"
+                  : "bg-surface-2 text-text-2 hover:brightness-110",
               )}
             >
               {p}
@@ -173,11 +169,11 @@ export function DashboardScreen() {
             <p className="text-[11px] font-semibold uppercase tracking-wide text-grey-400">
               {t(s.fastestFix, lang)} {periods[periodIdx]}
             </p>
-            <p className="mt-0.5 text-base font-bold text-grey-900">
+            <p className="mt-0.5 text-base font-bold text-white">
               {d.fastestFix.name}
             </p>
           </div>
-          <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-bold text-green-700">
+          <span className="rounded-full bg-green-500/15 px-3 py-1 text-sm font-bold text-green-400">
             {d.fastestFix.mttr} {t(s.mttr, lang)}
           </span>
         </Card>
@@ -188,7 +184,7 @@ export function DashboardScreen() {
             <p className="text-[11px] font-semibold uppercase tracking-wide text-grey-400">
               {t(s.resolutionRate, lang)}
             </p>
-            <p className="text-xl font-bold text-grey-900">{d.resolutionRate}%</p>
+            <p className="text-xl font-bold text-white">{d.resolutionRate}%</p>
           </div>
           <div className="h-2.5 w-full overflow-hidden rounded-full bg-grey-100">
             <div

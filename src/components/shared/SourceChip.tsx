@@ -23,12 +23,12 @@ export function SourceChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 bg-grey-100 text-grey-600 text-xs px-2 py-0.5 rounded-full whitespace-nowrap",
+        "inline-flex items-center gap-1.5 bg-surface-2 text-text-2 text-xs px-2 py-0.5 rounded-full whitespace-nowrap border border-border",
         className,
       )}
     >
       {checked ? (
-        <span className="text-green-600 font-semibold">✓</span>
+        <span className="text-green-400 font-semibold">✓</span>
       ) : (
         <Icon className="h-3 w-3" />
       )}

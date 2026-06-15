@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { VideoOff, Phone, Mail, ShieldCheck, Check, Pencil } from "lucide-react";
+import { VideoOff, Phone, Mail, ShieldCheck, Check, Pencil, RefreshCw, Camera } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -16,6 +16,7 @@ const MOCK_RESULT = {
   machine: "CNC-05",
   issueId: "issue-001",
   errorCode: "E-104",
+  errorText: "Tool Failure – Replace Drill Bit",
   confidence: 94,
   supplier: {
     name: "DMG MORI AG",
@@ -55,8 +56,8 @@ function EditableRow({
   }
 
   return (
-    <div className="flex items-center justify-between px-3 py-2.5 gap-2">
-      <span className="shrink-0 text-xs text-grey-500">{label}</span>
+    <div className="flex items-center justify-between border-b border-border py-3 last:border-0 gap-3">
+      <span className="shrink-0 text-xs text-text-2">{label}</span>
       <div className="flex items-center gap-1.5 min-w-0">
         {editing ? (
           <>
@@ -66,23 +67,23 @@ function EditableRow({
               onChange={(e) => setDraft(e.target.value)}
               onBlur={commit}
               onKeyDown={(e) => e.key === "Enter" && commit()}
-              className="w-full min-w-0 rounded border border-brand bg-brand/5 px-1.5 py-0.5 text-right text-xs font-medium text-grey-900 outline-none"
+              className="min-w-0 rounded border border-brand bg-brand/10 px-2 py-0.5 text-right text-xs font-medium text-white outline-none"
             />
             <button
               type="button"
               onMouseDown={(e) => { e.preventDefault(); commit(); }}
-              className="shrink-0 rounded-full p-0.5 text-brand"
+              className="shrink-0 text-brand"
             >
               <Check className="h-3.5 w-3.5" />
             </button>
           </>
         ) : (
           <>
-            <span className="truncate text-xs font-medium text-grey-900">{value}</span>
+            <span className="truncate text-xs font-semibold text-white">{value}</span>
             <button
               type="button"
               onClick={startEdit}
-              className="shrink-0 rounded-full p-0.5 text-grey-300 hover:text-grey-500 transition-colors"
+              className="shrink-0 text-text-2 hover:text-white transition-colors"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
@@ -100,13 +101,17 @@ export function GenericScanScreen() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [flash, setFlash] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [result, setResult] = useState<typeof MOCK_RESULT | null>(null);
   const [edits, setEdits] = useState<Record<EditableField, string>>({
     machine: MOCK_RESULT.machine,
     errorCode: MOCK_RESULT.errorCode,
-    errorText: t(s.errorText, lang),
+    errorText: MOCK_RESULT.errorText,
   });
   const [diagnosing, setDiagnosing] = useState(false);
   const [checkedCount, setCheckedCount] = useState(0);
@@ -117,12 +122,14 @@ export function GenericScanScreen() {
     t(s.checkMaint, lang),
   ];
 
+  // Start camera
   useEffect(() => {
     let active = true;
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: { ideal: "environment" } } })
+      .getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } } })
       .then((stream) => {
-        if (!active) { stream.getTracks().forEach((tk) => tk.stop()); return; }
+        if (!active) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.play().catch(() => {});
@@ -131,28 +138,79 @@ export function GenericScanScreen() {
       .catch((e) => {
         if (active) setCameraError(e.message ?? t(s.cameraUnavail, lang));
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function capture() {
+    if (scanning) return;
     setScanning(true);
+
+    // White flash
+    setFlash(true);
+    setTimeout(() => setFlash(false), 150);
+
+    // Freeze frame
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    if (canvas && video && video.videoWidth > 0) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext("2d")?.drawImage(video, 0, 0);
+    let base64: string | null = null;
+
+    if (canvas && video) {
+      const w = video.videoWidth || video.clientWidth || 640;
+      const h = video.videoHeight || video.clientHeight || 480;
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d")?.drawImage(video, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      setCapturedImage(dataUrl);
+      base64 = dataUrl.split(",")[1];
     }
-    setTimeout(() => {
-      setScanning(false);
-      setResult(MOCK_RESULT);
-      setEdits({
-        machine: MOCK_RESULT.machine,
-        errorCode: MOCK_RESULT.errorCode,
-        errorText: t(s.errorText, lang),
-      });
-    }, 1200);
+
+    // Stop stream immediately
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+
+    // Call API or fall back to mock
+    fetch("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: base64 ?? "" }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const detected = data.errorCode ? data : MOCK_RESULT;
+        setResult(detected);
+        setEdits({
+          machine: detected.machine ?? MOCK_RESULT.machine,
+          errorCode: detected.errorCode ?? MOCK_RESULT.errorCode,
+          errorText: detected.errorText ?? MOCK_RESULT.errorText,
+        });
+      })
+      .catch(() => {
+        setResult(MOCK_RESULT);
+        setEdits({ machine: MOCK_RESULT.machine, errorCode: MOCK_RESULT.errorCode, errorText: MOCK_RESULT.errorText });
+      })
+      .finally(() => setScanning(false));
+  }
+
+  function retake() {
+    setCapturedImage(null);
+    setResult(null);
+    setScanning(false);
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: { ideal: "environment" } } })
+      .then((stream) => {
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      })
+      .catch((e) => setCameraError(e.message ?? t(s.cameraUnavail, lang)));
   }
 
   function confirm() {
@@ -174,177 +232,201 @@ export function GenericScanScreen() {
     });
   }
 
-  return (
-    <AppShell title={t(s.title, lang)} back backHref="/dashboard" hideBottomNav contentClassName="flex flex-col">
-      {/* Edge-to-edge camera */}
-      <div className="relative flex-1 min-h-0 w-full overflow-hidden bg-black">
-        {cameraError ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-white/50">
-            <VideoOff className="h-10 w-10" />
-            <span className="text-sm">{t(s.cameraUnavail, lang)}</span>
-            <span className="text-xs opacity-60">{cameraError}</span>
-          </div>
-        ) : (
-          <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
-        )}
+  /* ── Phase 2: frozen image + results ── */
+  if (result) {
+    return (
+      <AppShell title={t(s.title, lang)} back backHref="/dashboard" hideBottomNav contentClassName="flex flex-col">
         <canvas ref={canvasRef} className="hidden" />
 
-        {/* Dark vignette edges */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/20" />
-
-        {/* Centered scanning guide */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="relative h-52 w-72">
-            {[
-              "left-0 top-0 border-l-2 border-t-2 rounded-tl-sm",
-              "right-0 top-0 border-r-2 border-t-2 rounded-tr-sm",
-              "left-0 bottom-0 border-l-2 border-b-2 rounded-bl-sm",
-              "right-0 bottom-0 border-r-2 border-b-2 rounded-br-sm",
-            ].map((c) => (
-              <span key={c} className={`absolute h-8 w-8 border-white ${c}`} />
-            ))}
-          </div>
-          {!cameraError && !scanning && !result && (
-            <p className="mt-4 rounded-full bg-black/40 px-4 py-1.5 text-center text-xs text-white/80 backdrop-blur-sm">
-              {t(s.alignPrompt, lang)}
-            </p>
+        {/* Frozen captured photo */}
+        <div className="relative w-full bg-black shrink-0" style={{ height: "42%" }}>
+          {capturedImage ? (
+            <img src={capturedImage} alt="Captured HMI" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-white/40 text-sm">No preview</div>
           )}
-        </div>
-      </div>
-
-      {/* Sticky CTA */}
-      <div className="cta-footer sticky bottom-0 px-4 pt-3">
-        <Button size="lg" className="w-full" onClick={capture} disabled={scanning}>
-          {scanning ? t(s.scanning, lang) : t(s.ctaScan, lang)}
-        </Button>
-      </div>
-
-      {/* Full-screen diagnosis loader */}
-      <AnimatePresence>
-        {diagnosing && (
-          <motion.div
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white px-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <button
+            onClick={retake}
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-xs text-white backdrop-blur-sm"
           >
-            <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-brand/10">
-              <span className="h-8 w-8 animate-spin rounded-full border-4 border-grey-200 border-t-brand" />
-            </div>
-            <h2 className="mb-1 text-lg font-bold text-grey-900">{t(s.preparing, lang)}</h2>
-            <p className="mb-8 text-sm text-grey-400">{t(s.pulling, lang)}</p>
-            <div className="flex flex-col gap-5 w-fit">
-              {CHECKS.map((label, i) => {
-                const done = checkedCount > i;
-                const active = checkedCount === i;
-                return (
-                  <motion.div
-                    key={label}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.12, type: "spring", stiffness: 300, damping: 24 }}
-                    className="flex items-center gap-3"
-                  >
-                    {done ? (
-                      <Check className="h-5 w-5 shrink-0 text-green-500" />
-                    ) : (
-                      <span className={cn(
-                        "h-5 w-5 shrink-0 rounded-full border-2 transition-colors duration-300",
-                        active ? "border-brand" : "border-grey-300",
-                      )}>
-                        {active && (
-                          <span className="flex h-full w-full items-center justify-center">
-                            <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
-                          </span>
-                        )}
-                      </span>
-                    )}
-                    <span className={cn(
-                      "text-sm font-medium transition-colors duration-300",
-                      done ? "text-green-600" : active ? "text-grey-900" : "text-grey-300",
-                    )}>
-                      {label}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <RefreshCw className="h-3.5 w-3.5" /> Retake
+          </button>
+          <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+            <span className="rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+              {result.machine}
+            </span>
+            <span className="rounded-full bg-green-900/70 px-3 py-1 text-xs font-semibold text-green-400 backdrop-blur-sm">
+              {result.confidence}% confident
+            </span>
+          </div>
+        </div>
 
-      {/* Result sheet */}
-      <AnimatePresence>
-        {result && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-40 bg-black/30"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => !diagnosing && setResult(null)}
-            />
-            <motion.div
-              className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-lg rounded-t-2xl bg-white p-5 shadow-2xl"
-              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            >
-              <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-grey-200" />
+        {/* Results panel */}
+        <div className="flex flex-1 flex-col bg-surface overflow-hidden">
+          <div className="px-5 pt-3 pb-2 shrink-0">
+            <Progress value={result.confidence} fillClassName="bg-green-500" />
+          </div>
 
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-grey-900">{t(s.machineDetected, lang)}</h2>
-                <span className="text-sm font-medium text-green-600">
-                  {result.confidence}{t(s.confident, lang)}
+          <div className="flex-1 overflow-y-auto px-5 pb-4">
+            {/* Editable error info */}
+            <div className="mb-4">
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-text-2">Detected</p>
+              <EditableRow label="Error Code" value={edits.errorCode} onChange={(v) => setEdits((p) => ({ ...p, errorCode: v }))} />
+              <EditableRow label="Description" value={edits.errorText} onChange={(v) => setEdits((p) => ({ ...p, errorText: v }))} />
+              <EditableRow label="Machine" value={edits.machine} onChange={(v) => setEdits((p) => ({ ...p, machine: v }))} />
+              <p className="mt-1 text-[10px] text-text-2">Tap <Pencil className="inline h-2.5 w-2.5" /> to correct any field.</p>
+            </div>
+
+            {/* Supplier info */}
+            <div className="rounded-xl bg-surface-2 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-xs font-semibold text-white">{result.supplier.name}</p>
+                  <p className="text-[11px] text-text-2">{result.supplier.country} · {result.supplier.partNumber}</p>
+                </div>
+                <span className="flex items-center gap-1 text-[11px] font-medium text-green-400 shrink-0">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  {lang === "de" ? result.supplier.warrantyDe : result.supplier.warrantyEn}
                 </span>
               </div>
-              <Progress value={result.confidence} className="mt-2" fillClassName="bg-green-500" />
-
-              {/* Editable error info */}
-              <div className="mt-4 divide-y divide-grey-100 rounded-lg border border-grey-100">
-                <EditableRow
-                  label={t(s.fieldMachine, lang)}
-                  value={edits.machine}
-                  onChange={(v) => setEdits((p) => ({ ...p, machine: v }))}
-                />
-                <EditableRow
-                  label={t(s.fieldErrorCode, lang)}
-                  value={edits.errorCode}
-                  onChange={(v) => setEdits((p) => ({ ...p, errorCode: v }))}
-                />
-                <EditableRow
-                  label={t(s.fieldErrorText, lang)}
-                  value={edits.errorText}
-                  onChange={(v) => setEdits((p) => ({ ...p, errorText: v }))}
-                />
-              </div>
-
-              {/* Supplier info — read only */}
-              <div className="mt-3 divide-y divide-grey-100 rounded-lg border border-grey-100">
-                <div className="flex items-center justify-between px-3 py-2.5">
-                  <div>
-                    <p className="text-xs font-semibold text-grey-900">{result.supplier.name}</p>
-                    <p className="text-[11px] text-grey-400">
-                      {result.supplier.country} · Part: {result.supplier.partNumber}
-                    </p>
-                  </div>
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-green-600">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    {lang === "de" ? result.supplier.warrantyDe : result.supplier.warrantyEn}
-                  </span>
-                </div>
-                <a href={`tel:${result.supplier.phone}`} className="flex items-center gap-2 px-3 py-2.5 text-xs text-blue-600">
+              <div className="flex gap-3 pt-1 border-t border-border">
+                <a href={`tel:${result.supplier.phone}`} className="flex items-center gap-1.5 text-xs text-brand">
                   <Phone className="h-3.5 w-3.5" />{result.supplier.phone}
                 </a>
-                <a href={`mailto:${result.supplier.email}`} className="flex items-center gap-2 px-3 py-2.5 text-xs text-blue-600">
+                <a href={`mailto:${result.supplier.email}`} className="flex items-center gap-1.5 text-xs text-brand">
                   <Mail className="h-3.5 w-3.5" />{result.supplier.email}
                 </a>
               </div>
+            </div>
+          </div>
 
-              <Button size="lg" className="mt-4 w-full" onClick={confirm}>
-                {t(s.ctaStart, lang)}
-              </Button>
+          <div className="shrink-0 border-t border-border px-5 py-4">
+            <Button size="lg" className="w-full" onClick={confirm}>
+              {t(s.ctaStart, lang)}
+            </Button>
+          </div>
+        </div>
+
+        {/* Diagnosis loading overlay */}
+        <AnimatePresence>
+          {diagnosing && (
+            <motion.div
+              className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-nav px-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-full bg-brand/15">
+                <span className="h-8 w-8 animate-spin rounded-full border-4 border-surface border-t-brand" />
+              </div>
+              <h2 className="mb-1 text-lg font-bold text-white">{t(s.preparing, lang)}</h2>
+              <p className="mb-8 text-sm text-text-2">{t(s.pulling, lang)}</p>
+              <div className="flex flex-col gap-5 w-fit">
+                {CHECKS.map((label, i) => {
+                  const done = checkedCount > i;
+                  const active = checkedCount === i;
+                  return (
+                    <motion.div
+                      key={label}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.12, type: "spring", stiffness: 300, damping: 24 }}
+                      className="flex items-center gap-3"
+                    >
+                      {done ? (
+                        <Check className="h-5 w-5 shrink-0 text-green-400" />
+                      ) : (
+                        <span className={cn(
+                          "h-5 w-5 shrink-0 rounded-full border-2 transition-colors duration-300 flex items-center justify-center",
+                          active ? "border-brand" : "border-border-strong",
+                        )}>
+                          {active && (
+                            <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
+                          )}
+                        </span>
+                      )}
+                      <span className={cn(
+                        "text-sm font-medium transition-colors duration-300",
+                        done ? "text-green-400" : active ? "text-white" : "text-text-2",
+                      )}>
+                        {label}
+                      </span>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </AppShell>
+    );
+  }
+
+  /* ── Phase 1: live camera ── */
+  return (
+    <AppShell title={t(s.title, lang)} back backHref="/dashboard" hideBottomNav contentClassName="flex flex-col">
+      <div className="flex flex-1 flex-col min-h-0">
+
+        {/* Camera viewport — no interactive elements inside */}
+        <div className="relative flex-1 min-h-0 overflow-hidden bg-black">
+          {cameraError ? (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-white/60">
+              <VideoOff className="h-10 w-10" />
+              <span className="text-sm">{t(s.cameraUnavail, lang)}</span>
+              <span className="text-xs opacity-60">{cameraError}</span>
+            </div>
+          ) : (
+            <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+          )}
+          <canvas ref={canvasRef} className="hidden" />
+
+          {/* Dark vignette */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/20" />
+
+          {/* Scanning guide brackets */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div className="relative h-52 w-72">
+              {[
+                "left-0 top-0 border-l-2 border-t-2",
+                "right-0 top-0 border-r-2 border-t-2",
+                "left-0 bottom-0 border-l-2 border-b-2",
+                "right-0 bottom-0 border-r-2 border-b-2",
+              ].map((c) => (
+                <span key={c} className={`absolute h-8 w-8 border-white/80 ${c}`} />
+              ))}
+            </div>
+            {!scanning && (
+              <p className="mt-4 rounded-full bg-black/40 px-4 py-1.5 text-center text-xs text-white/80 backdrop-blur-sm">
+                {t(s.alignPrompt, lang)}
+              </p>
+            )}
+          </div>
+
+          {/* White flash */}
+          {flash && <div className="absolute inset-0 bg-white pointer-events-none" />}
+        </div>
+
+        {/* Shutter row — OUTSIDE camera, no z-index fights */}
+        <div className="flex flex-col items-center gap-2 py-5 shrink-0 bg-nav">
+          <button
+            type="button"
+            onClick={capture}
+            disabled={scanning || !!cameraError}
+            aria-label="Capture"
+            className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-brand shadow-xl disabled:opacity-40 active:scale-95 transition-transform"
+          >
+            {scanning ? (
+              <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            ) : (
+              <Camera className="h-7 w-7 text-white" strokeWidth={2} />
+            )}
+          </button>
+          <p className="text-xs text-text-2 text-center px-6">
+            {cameraError ? "Allow camera access and reload." : scanning ? "Reading error screen…" : t(s.ctaScan, lang)}
+          </p>
+        </div>
+
+      </div>
     </AppShell>
   );
 }

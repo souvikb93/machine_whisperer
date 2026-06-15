@@ -1,83 +1,122 @@
 @import "tailwindcss";
 
 /* ============================================================
-   ShiftAssist — Tracka "Berlin Glass" design language
-   Light theme · orange #FF5A2F accent · frosted glass over mesh.
-   All colour is token-driven (Tailwind v4 @theme) so every
-   screen re-skins from here. No hardcoded hex in components.
+   Machine Whisperer — Bosch Design System
+   Dark navy theme · #E20015 brand red · Bosch Professional
+   Token-driven via Tailwind v4 @theme — no hardcoded hex
+   in components.
+   Extracted from Bosch Smart Home + Bosch Toolbox (Professional)
    ============================================================ */
 
 @theme {
   /* === FONTS === */
-  --font-sans: "Satoshi", var(--font-dm-sans), "Helvetica Neue", system-ui, sans-serif;
-  --font-mono: var(--font-dm-mono), monospace;
+  --font-sans: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
-  /* === BRAND — Bosch red (the single accent) === */
-  --color-brand:        #E20015;
-  --color-brand-hover:  #C20012;
-  --color-brand-active: #9A000E;
+  /* ── PRIMITIVE RAMP — Bosch Navy ───────────────────────── */
+  --color-navy-950: #060F1E;
+  --color-navy-900: #0D2140;
+  --color-navy-800: #122A52;
+  --color-navy-700: #163870;  /* Bosch Toolbox tile bg */
+  --color-navy-600: #1A4080;
+  --color-navy-500: #1E5FA8;  /* Bosch product-card blue */
+  --color-navy-400: #2D7DD2;
+  --color-navy-300: #4A9FE8;
 
-  /* === INK / SEMANTIC NEUTRALS (warm, Tracka) === */
-  --color-ink:        #151515;
-  --color-ink-2:      #2A2A2A;
-  --color-ink-muted:  #4A4A4A;
-  --color-surface:    #FFFFFF;
-  --color-surface-2:  #ECEAE3;
-  --color-line:       #C9C5BB;
+  /* ── PRIMITIVE RAMP — Bosch Red ────────────────────────── */
+  --color-bosch-red-700: #A80010;
+  --color-bosch-red-600: #C2001B;
+  --color-bosch-red-500: #E20015;  /* ★ Bosch brand red */
+  --color-bosch-red-400: #FF1A2E;
 
-  /* === NEUTRAL RAMP (warm) — legacy grey-* utilities remap here === */
-  --color-grey-50:  #F3F2EE;
-  --color-grey-100: #ECEAE3;
-  --color-grey-200: #E2DFD7;
-  --color-grey-300: #CBC7BC;
-  --color-grey-400: #8E8A81;
-  --color-grey-500: #57544E;
-  --color-grey-600: #45423C;
-  --color-grey-700: #34322D;
-  --color-grey-800: #24221F;
-  --color-grey-900: #151515;
-  --color-white:    #FFFFFF;
+  /* ── SEMANTIC — background / surface ───────────────────── */
+  --color-bg:        var(--color-navy-900);   /* #0D2140 app bg */
+  --color-surface:   var(--color-navy-800);   /* #122A52 cards  */
+  --color-surface-2: var(--color-navy-700);   /* #163870 tiles  */
+  --color-tile:      var(--color-navy-700);
+  --color-nav:       var(--color-navy-950);   /* #060F1E bottom nav */
+  --color-header:    #FFFFFF;                 /* white top bar */
 
-  /* === DANGER (Tracka red) === */
-  --color-red-50:  #FEF2F2;
-  --color-red-100: #FEE2E2;
-  --color-red-200: #FECACA;
-  --color-red-500: #EF4444;
-  --color-red-600: #DC2626;
-  --color-red-700: #B91C1C;
+  /* ── SEMANTIC — brand ──────────────────────────────────── */
+  --color-brand:        var(--color-bosch-red-500);
+  --color-brand-hover:  var(--color-bosch-red-600);
+  --color-brand-active: var(--color-bosch-red-700);
+  --color-blue:         var(--color-navy-500);
 
-  /* === AMBER (warning) === */
-  --color-amber-50:  #FFF8E6;
-  --color-amber-100: #FDECC8;
-  --color-amber-200: #FCD34D;
-  --color-amber-400: #F59E0B;
-  --color-amber-600: #D97706;
-  --color-amber-700: #B45309;
-  --color-amber-800: #92400E;
+  /* ── SEMANTIC — text ───────────────────────────────────── */
+  --color-text:         #FFFFFF;
+  --color-text-2:       rgba(255, 255, 255, 0.62);
+  --color-text-muted:   rgba(255, 255, 255, 0.38);
+  --color-text-header:  #0D2140;   /* dark text on white header */
 
-  /* === GREEN (success) === */
-  --color-green-50:  #ECFDF5;
-  --color-green-100: #D1FAE5;
-  --color-green-400: #34D399;
-  --color-green-500: #10B981;
-  --color-green-600: #059669;
-  --color-green-700: #065F46;
+  /* ── SEMANTIC — borders ────────────────────────────────── */
+  --color-border:       rgba(255, 255, 255, 0.10);
+  --color-border-strong: rgba(255, 255, 255, 0.22);
 
-  /* === BLUE (info) === */
-  --color-blue-50:  #EFF6FF;
-  --color-blue-100: #DBEAFE;
-  --color-blue-500: #3B82F6;
-  --color-blue-700: #1D4ED8;
-  --color-blue-800: #1E40AF;
+  /* ── STATUS — severity / states ────────────────────────── */
+  --color-critical:      var(--color-bosch-red-500);
+  --color-critical-bg:   rgba(226, 0, 21, 0.15);
+  --color-warning:       #F5C842;
+  --color-warning-bg:    rgba(245, 200, 66, 0.15);
+  --color-warning-text:  #1A1200;
+  --color-ok:            #1DB974;
+  --color-ok-bg:         rgba(29, 185, 116, 0.15);
+  --color-ok-text:       #001A0D;
+  --color-info:          var(--color-navy-500);
+  --color-info-bg:       rgba(30, 95, 168, 0.20);
 
-  /* === PURPLE (rare / plant knowledge) === */
-  --color-purple-50:  #FAF5FF;
-  --color-purple-100: #F3E8FF;
-  --color-purple-200: #E9D5FF;
+  /* ── LEGACY neutrals (kept for back-compat) ─────────────── */
+  --color-ink:        #FFFFFF;
+  --color-ink-2:      rgba(255, 255, 255, 0.80);
+  --color-ink-muted:  rgba(255, 255, 255, 0.50);
+  --color-grey-50:    rgba(255, 255, 255, 0.06);
+  --color-grey-100:   rgba(255, 255, 255, 0.10);
+  --color-grey-200:   rgba(255, 255, 255, 0.18);
+  --color-grey-300:   rgba(255, 255, 255, 0.30);
+  --color-grey-400:   rgba(255, 255, 255, 0.45);
+  --color-grey-500:   rgba(255, 255, 255, 0.60);
+  --color-grey-600:   rgba(255, 255, 255, 0.72);
+  --color-grey-700:   rgba(255, 255, 255, 0.84);
+  --color-grey-800:   rgba(255, 255, 255, 0.92);
+  --color-grey-900:   #FFFFFF;
+  --color-white:      #FFFFFF;
+
+  /* ── DANGER / AMBER / GREEN / BLUE / PURPLE (status) ───── */
+  --color-red-50:   rgba(226, 0, 21, 0.08);
+  --color-red-100:  rgba(226, 0, 21, 0.15);
+  --color-red-200:  rgba(226, 0, 21, 0.25);
+  --color-red-500:  #E20015;
+  --color-red-600:  #C2001B;
+  --color-red-700:  #A80010;
+
+  --color-amber-50:  rgba(245, 200, 66, 0.08);
+  --color-amber-100: rgba(245, 200, 66, 0.15);
+  --color-amber-200: rgba(245, 200, 66, 0.25);
+  --color-amber-400: #F5C842;
+  --color-amber-600: #C9A000;
+  --color-amber-700: #A07B00;
+  --color-amber-800: #7A5E00;
+
+  --color-green-50:  rgba(29, 185, 116, 0.08);
+  --color-green-100: rgba(29, 185, 116, 0.15);
+  --color-green-400: #1DB974;
+  --color-green-500: #17A366;
+  --color-green-600: #108A55;
+  --color-green-700: #087040;
+
+  --color-blue-50:   rgba(30, 95, 168, 0.10);
+  --color-blue-100:  rgba(30, 95, 168, 0.18);
+  --color-blue-500:  #1E5FA8;
+  --color-blue-700:  #163870;
+  --color-blue-800:  #122A52;
+
+  --color-purple-50:  rgba(147, 51, 234, 0.10);
+  --color-purple-100: rgba(147, 51, 234, 0.18);
+  --color-purple-200: rgba(147, 51, 234, 0.25);
   --color-purple-600: #9333EA;
   --color-purple-700: #7E22CE;
 
-  /* === RADIUS === */
+  /* ── RADIUS ─────────────────────────────────────────────── */
   --radius-sm:   6px;
   --radius-md:   8px;
   --radius-lg:   12px;
@@ -85,14 +124,18 @@
   --radius-2xl:  20px;
   --radius-full: 9999px;
 
-  /* === ANIMATION === */
+  /* ── ANIMATION ──────────────────────────────────────────── */
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out:     cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ──────────────────────────────────────────────────────────── */
+/*  BASE                                                        */
+/* ──────────────────────────────────────────────────────────── */
 body {
-  background: var(--color-grey-50);
-  color: var(--color-ink);
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -100,113 +143,194 @@ body {
 
 ::selection { background: var(--color-brand); color: #fff; }
 
-/* ============================================================
-   Berlin Glass — surfaces
-   ============================================================ */
+/* ──────────────────────────────────────────────────────────── */
+/*  BOSCH SURFACES                                              */
+/* ──────────────────────────────────────────────────────────── */
+
+/* Primary card — replaces Berlin Glass glass-card */
 .glass-card {
-  background: rgb(255 255 255 / 0.85);
-  border: 1px solid rgb(0 0 0 / 0.06);
-  border-radius: 20px;
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  backdrop-filter: blur(20px) saturate(140%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.65),
-    0 1px 2px rgb(21 21 21 / 0.04),
-    0 12px 28px -12px rgb(21 21 21 / 0.14);
-}
-.glass-nav {
-  background: rgb(255 255 255 / 0.80);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  backdrop-filter: blur(20px) saturate(140%);
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.4);
 }
 
-/* Pinned bottom action bar — frosted, elevated, safe-area aware.
-   Used by every screen footer that holds a primary CTA. */
+/* Tile card (Bosch Toolbox grid style) */
+.bosch-tile {
+  background: var(--color-tile);
+  border-radius: 10px;
+  border: 0.5px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  gap: 8px;
+}
+.bosch-tile-icon {
+  color: var(--color-text);
+  font-size: 24px;
+}
+.bosch-tile-label {
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+/* Elevated surface (modals, bottom sheets) */
+.bosch-sheet {
+  background: var(--color-surface);
+  border-top: 0.5px solid var(--color-border-strong);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.5);
+}
+
+/* Header bar (white, like Bosch Toolbox) */
+.bosch-header {
+  background: var(--color-header);
+  color: var(--color-text-header);
+  border-bottom: 0.5px solid rgba(13, 33, 64, 0.12);
+}
+
+/* Bottom navigation (darkest, like Toolbox) */
+.glass-nav {
+  background: var(--color-nav);
+  border-top: 0.5px solid var(--color-border);
+}
+
+/* Pinned CTA footer */
 .cta-footer {
-  background: rgb(255 255 255 / 0.82);
-  border-top: 1px solid rgb(0 0 0 / 0.06);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  backdrop-filter: blur(20px) saturate(140%);
-  box-shadow: 0 -8px 24px -16px rgb(21 21 21 / 0.18);
+  background: var(--color-surface);
+  border-top: 0.5px solid var(--color-border-strong);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
   padding-bottom: max(env(safe-area-inset-bottom), 20px);
 }
 
-/* ============================================================
-   Berlin Glass — editorial typography scale
-   ============================================================ */
+/* ──────────────────────────────────────────────────────────── */
+/*  TYPOGRAPHY SCALE                                            */
+/* ──────────────────────────────────────────────────────────── */
 .eyebrow-mono {
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.2em;
-  color: var(--color-ink-muted);
+  letter-spacing: 0.1em;
+  color: var(--color-text-2);
 }
 .display-1 {
-  font-size: 40px;
-  line-height: 1.04;
+  font-size: 28px;
+  line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 .heading-1 {
-  font-size: 28px;
-  line-height: 1.15;
+  font-size: 20px;
+  line-height: 1.2;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 .heading-2 {
-  font-size: 22px;
-  line-height: 1.2;
+  font-size: 16px;
+  line-height: 1.3;
   font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--color-ink);
+  letter-spacing: 0em;
+  color: var(--color-text);
 }
 
-/* ============================================================
-   Animated brand mesh — sits behind the app (z -10)
-   ============================================================ */
+/* ──────────────────────────────────────────────────────────── */
+/*  SEVERITY BADGES                                             */
+/* ──────────────────────────────────────────────────────────── */
+.badge-critical {
+  background: var(--color-critical);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.badge-warning {
+  background: var(--color-warning);
+  color: var(--color-warning-text);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.badge-ok {
+  background: var(--color-ok);
+  color: var(--color-ok-text);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.badge-info {
+  background: var(--color-info);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ──────────────────────────────────────────────────────────── */
+/*  APP BACKGROUND (Bosch dark — replaces animated mesh)        */
+/* ──────────────────────────────────────────────────────────── */
 .app-mesh {
   position: fixed;
   inset: 0;
   z-index: -10;
   overflow: hidden;
   pointer-events: none;
-  background: linear-gradient(180deg, #F6F4F0 0%, #F1EFE9 100%);
+  background: var(--color-bg);
 }
-.app-mesh::before,
+.app-mesh::before {
+  content: "";
+  position: absolute;
+  width: 60%;
+  height: 40%;
+  top: -10%;
+  left: -15%;
+  background: rgba(30, 95, 168, 0.12);
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: mesh-drift-a 32s var(--ease-out) infinite alternate;
+}
 .app-mesh::after {
   content: "";
   position: absolute;
+  width: 50%;
+  height: 45%;
+  bottom: -10%;
+  right: -10%;
+  background: rgba(226, 0, 21, 0.07);
   border-radius: 50%;
-  filter: blur(70px);
-  will-change: transform;
+  filter: blur(80px);
+  animation: mesh-drift-b 40s var(--ease-out) infinite alternate;
 }
-.app-mesh::before {
-  width: 70%; height: 50%;
-  top: -12%; left: -18%;
-  background: rgb(226 0 21 / 0.15);
-  animation: mesh-drift-a 28s var(--ease-out) infinite alternate;
-}
-.app-mesh::after {
-  width: 75%; height: 55%;
-  bottom: -16%; right: -20%;
-  background: rgb(226 0 21 / 0.09);
-  animation: mesh-drift-b 34s var(--ease-out) infinite alternate;
-}
-@keyframes mesh-drift-a { to { transform: translate3d(8%, 6%, 0) scale(1.15); } }
-@keyframes mesh-drift-b { to { transform: translate3d(-6%, -7%, 0) scale(1.12); } }
+@keyframes mesh-drift-a { to { transform: translate3d(6%, 5%, 0) scale(1.1); } }
+@keyframes mesh-drift-b { to { transform: translate3d(-5%, -6%, 0) scale(1.08); } }
 
-/* ============================================================
-   Motion
-   ============================================================ */
-/* Pulsing dot for CRITICAL severity */
+/* ──────────────────────────────────────────────────────────── */
+/*  MOTION                                                      */
+/* ──────────────────────────────────────────────────────────── */
 @keyframes mw-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.4; transform: scale(0.8); }
+  50%      { opacity: 0.35; transform: scale(0.78); }
 }
 .mw-pulse {
-  animation: mw-pulse 2s var(--ease-default) infinite;
+  animation: mw-pulse 1.8s var(--ease-default) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

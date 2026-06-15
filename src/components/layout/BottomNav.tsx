@@ -22,7 +22,7 @@ function NavTab({
     <Link
       href={href}
       className={cn(
-        "flex flex-1 flex-col items-center justify-end gap-1 px-6 pb-2.5 pt-1 text-xs font-medium transition-colors",
+        "flex flex-1 flex-col items-center justify-end gap-1 pb-2.5 pt-1 text-xs font-medium transition-colors",
         active ? "text-brand" : "text-grey-400 hover:text-grey-700",
       )}
     >

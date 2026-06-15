@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BottomNav } from "./BottomNav";
+import { IconButton } from "@/components/ui/button";
 
 export function AppShell({
   title,
@@ -25,20 +26,19 @@ export function AppShell({
   const router = useRouter();
 
   return (
-    <div className="relative h-full" style={{ background: "#F3F2EE" }}>
+    <div className="relative h-full" style={{ background: "var(--color-bg)" }}>
       <div className="app-mesh" aria-hidden="true" />
       <div className="relative mx-auto flex h-full w-full max-w-lg flex-col">
         {title !== undefined && (
           <header className="glass-nav sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-black/[0.06] px-4">
             {back && (
-              <button
-                type="button"
+              <IconButton
                 aria-label="Back"
                 onClick={() => (backHref ? router.push(backHref) : router.back())}
-                className="-ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-ink/70 transition-colors hover:bg-black/[0.05]"
+                className="-ml-1"
               >
                 <ArrowLeft className="h-5 w-5" />
-              </button>
+              </IconButton>
             )}
             <div className="flex-1 truncate text-base font-semibold text-ink">
               {title}

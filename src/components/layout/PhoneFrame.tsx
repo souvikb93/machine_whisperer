@@ -20,12 +20,12 @@ function StatusBar() {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "14px 20px 4px",
-        background: "#FFFFFF",
+        background: "#060F1E",
         flexShrink: 0,
       }}
     >
       {/* Time */}
-      <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: 0.2, color: "#151515" }}>
+      <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: 0.2, color: "#FFFFFF" }}>
         {time}
       </span>
 
@@ -33,17 +33,17 @@ function StatusBar() {
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         {/* Signal bars */}
         <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
-          <rect x="0" y="8" width="3" height="4" rx="0.6" fill="#151515" />
-          <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.6" fill="#151515" />
-          <rect x="9" y="3" width="3" height="9" rx="0.6" fill="#151515" />
-          <rect x="13.5" y="0" width="3" height="12" rx="0.6" fill="#151515" />
+          <rect x="0" y="8" width="3" height="4" rx="0.6" fill="white" />
+          <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.6" fill="white" />
+          <rect x="9" y="3" width="3" height="9" rx="0.6" fill="white" />
+          <rect x="13.5" y="0" width="3" height="12" rx="0.6" fill="white" />
         </svg>
 
         {/* WiFi */}
         <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-          <path d="M8 9.5a1.2 1.2 0 1 1 0 2.4A1.2 1.2 0 0 1 8 9.5z" fill="#151515" />
-          <path d="M4.6 7.2a4.8 4.8 0 0 1 6.8 0" stroke="#151515" strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M2 4.6a8 8 0 0 1 12 0" stroke="#151515" strokeWidth="1.4" strokeLinecap="round" />
+          <path d="M8 9.5a1.2 1.2 0 1 1 0 2.4A1.2 1.2 0 0 1 8 9.5z" fill="white" />
+          <path d="M4.6 7.2a4.8 4.8 0 0 1 6.8 0" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+          <path d="M2 4.6a8 8 0 0 1 12 0" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
         </svg>
 
         {/* Battery */}
@@ -52,16 +52,16 @@ function StatusBar() {
             style={{
               width: 22,
               height: 11,
-              border: "1.5px solid #151515",
+              border: "1.5px solid white",
               borderRadius: 3,
               padding: 1.5,
               display: "flex",
               alignItems: "center",
             }}
           >
-            <div style={{ width: "75%", height: "100%", background: "#151515", borderRadius: 1.5 }} />
+            <div style={{ width: "75%", height: "100%", background: "white", borderRadius: 1.5 }} />
           </div>
-          <div style={{ width: 2, height: 5, background: "#151515", borderRadius: 1 }} />
+          <div style={{ width: 2, height: 5, background: "white", borderRadius: 1 }} />
         </div>
       </div>
     </div>
@@ -109,7 +109,7 @@ export function PhoneFrame({ children }: { children: React.ReactNode }) {
         <StatusBar />
 
         {/* App content — AppShell manages its own scroll */}
-        <div style={{ flex: 1, overflow: "hidden", background: "#F3F2EE", display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, overflow: "hidden", background: "#0D2140", display: "flex", flexDirection: "column" }}>
           {children}
         </div>
 

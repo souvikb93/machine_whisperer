@@ -54,9 +54,9 @@ export function AlertScreen() {
     WarrantyStatus,
     { icon: typeof ShieldCheck; label: string; className: string }
   > = {
-    active:   { icon: ShieldCheck, label: t(s.warrantyActive, lang),   className: "text-green-600" },
-    expiring: { icon: ShieldAlert, label: t(s.warrantyExpiring, lang), className: "text-amber-600" },
-    expired:  { icon: ShieldOff,  label: t(s.warrantyExpired, lang),  className: "text-red-600" },
+    active:   { icon: ShieldCheck, label: t(s.warrantyActive, lang),   className: "text-green-400" },
+    expiring: { icon: ShieldAlert, label: t(s.warrantyExpiring, lang), className: "text-amber-400" },
+    expired:  { icon: ShieldOff,  label: t(s.warrantyExpired, lang),  className: "text-red-500" },
   };
 
   const warranty = WARRANTY_CONFIG[supplier.warrantyStatus];
@@ -84,7 +84,7 @@ export function AlertScreen() {
         {/* Severity banner */}
         <div className="flex items-center gap-2 border-b border-red-100 bg-red-50 px-4 py-3">
           <span className="h-2 w-2 rounded-full bg-red-500 mw-pulse" />
-          <span className="text-sm font-semibold text-red-600">
+          <span className="text-sm font-semibold text-red-500">
             {t(s.criticalBanner, lang)}
           </span>
         </div>
@@ -92,7 +92,7 @@ export function AlertScreen() {
         <div className="space-y-5 px-4 pt-4">
           {/* Downtime block */}
           <Card className="p-5 text-center">
-            <div className="font-mono text-3xl font-bold text-red-600">
+            <div className="font-mono text-3xl font-bold text-red-500">
               {live.formatted}
             </div>
             <p className="mt-1.5 text-sm text-grey-500">

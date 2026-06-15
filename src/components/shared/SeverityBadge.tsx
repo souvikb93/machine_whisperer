@@ -16,11 +16,11 @@ const KIND_LABEL: Record<BadgeKind, string> = {
 };
 
 const KIND_CLASSES: Record<BadgeKind, string> = {
-  critical: "bg-red-50 text-red-600 border-red-200",
-  warning: "bg-amber-50 text-amber-700 border-amber-200",
-  resolved: "bg-green-50 text-green-700 border-green-100",
-  "in-progress": "bg-blue-50 text-blue-700 border-blue-100",
-  info: "bg-grey-100 text-grey-600 border-grey-200",
+  critical:     "bg-red-100 text-red-500 border-red-200",
+  warning:      "bg-amber-100 text-amber-400 border-amber-200",
+  resolved:     "bg-green-100 text-green-400 border-green-400/30",
+  "in-progress":"bg-amber-100 text-amber-400 border-amber-400/30",
+  info:         "bg-surface-2 text-text-2 border-border",
 };
 
 export function SeverityBadge({

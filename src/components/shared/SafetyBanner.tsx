@@ -17,21 +17,21 @@ export function SafetyBanner({
       className={cn(
         "flex items-start gap-2.5 rounded-md border p-3",
         isDanger
-          ? "bg-red-50 border-red-200"
-          : "bg-amber-50 border-amber-200",
+          ? "bg-red-100 border-red-200"
+          : "bg-amber-100 border-amber-200",
         className,
       )}
     >
       <Icon
         className={cn(
           "h-5 w-5 shrink-0 mt-0.5",
-          isDanger ? "text-red-600" : "text-amber-600",
+          isDanger ? "text-red-500" : "text-amber-400",
         )}
       />
       <p
         className={cn(
           "text-sm font-medium",
-          isDanger ? "text-red-700" : "text-amber-800",
+          isDanger ? "text-red-500" : "text-amber-400",
         )}
       >
         {text}

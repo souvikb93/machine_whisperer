@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { BottomBar } from "@/components/layout/BottomBar";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getIssueById } from "@/lib/mockData";
 import { STRINGS, t } from "@/lib/i18n";
@@ -42,16 +42,16 @@ export function ShiftBookScreen() {
       back
       backHref={`/capture/${issue.id}`}
       right={
-        <button className="flex h-9 w-9 items-center justify-center rounded-md text-grey-600 hover:bg-grey-100">
+        <IconButton aria-label="Share report">
           <Share2 className="h-4 w-4" />
-        </button>
+        </IconButton>
       }
     >
       <div className="pb-28">
         {/* Published banner */}
         <div className="flex items-center gap-2 border-b border-green-100 bg-green-50 px-4 py-3">
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
-          <span className="text-sm font-semibold text-green-700">
+          <CheckCircle2 className="h-5 w-5 text-green-400" />
+          <span className="text-sm font-semibold text-green-400">
             {t(s.published, lang)}
           </span>
         </div>
@@ -120,15 +120,15 @@ export function ShiftBookScreen() {
 
           {/* AI knowledge graph */}
           <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
-            <div className="mb-1 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700">
+            <div className="mb-1 inline-flex items-center gap-1.5 text-sm font-semibold text-navy-300">
               <Sparkles className="h-4 w-4" /> {t(s.kgUpdated, lang)}
             </div>
-            <p className="text-sm text-blue-800">{t(s.kgBody1, lang)}</p>
-            <p className="mt-1 text-sm text-blue-800">{t(s.kgBody2, lang)}</p>
+            <p className="text-sm text-navy-300/80">{t(s.kgBody1, lang)}</p>
+            <p className="mt-1 text-sm text-navy-300/80">{t(s.kgBody2, lang)}</p>
           </div>
 
           {/* Savings summary */}
-          <div className="rounded-lg bg-green-50 p-4 text-green-700">
+          <div className="rounded-lg bg-green-50 p-4 text-green-400">
             <p className="text-sm font-medium">{t(s.savedSummary, lang)} €1,340 · 47 min</p>
             <p className="mt-0.5 text-sm">{t(s.shiftTotal, lang)}</p>
           </div>

@@ -54,9 +54,9 @@ export function ProfileScreen() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: Wrench,        value: "3",      label: t(s.issuesHandled, lang), color: "text-brand" },
-              { icon: CheckCircle2,  value: "2",      label: t(s.resolved, lang),      color: "text-green-600" },
+              { icon: CheckCircle2,  value: "2",      label: t(s.resolved, lang),      color: "text-green-400" },
               { icon: Clock,         value: "19 min", label: t(s.avgFixTime, lang),    color: "text-grey-700" },
-              { icon: Euro,          value: "€1,820", label: t(s.costSaved, lang),     color: "text-green-600" },
+              { icon: Euro,          value: "€1,820", label: t(s.costSaved, lang),     color: "text-green-400" },
             ].map(({ icon: Icon, value, label, color }) => (
               <Card key={label} className="p-4">
                 <Icon className={`h-5 w-5 mb-1 ${color}`} />

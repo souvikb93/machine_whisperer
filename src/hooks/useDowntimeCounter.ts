@@ -12,12 +12,11 @@ interface DowntimeCounter {
 
 /** Ticking stopwatch from `stoppedAt` → now. Updates every second. */
 export function useDowntimeCounter(
-  stoppedAt: Date,
+  stoppedAt: Date | string,
   costPerMinute: number,
 ): DowntimeCounter {
-  // Start from `stoppedAt` so the first (SSR + hydration) render is
-  // deterministic — elapsed 0 — then tick from real time after mount.
-  const [now, setNow] = useState<number>(() => stoppedAt.getTime());
+  const stoppedDate = stoppedAt instanceof Date ? stoppedAt : new Date(stoppedAt);
+  const [now, setNow] = useState<number>(() => stoppedDate.getTime());
 
   useEffect(() => {
     setNow(Date.now());
@@ -25,7 +24,7 @@ export function useDowntimeCounter(
     return () => clearInterval(id);
   }, []);
 
-  const elapsedMs = Math.max(0, now - stoppedAt.getTime());
+  const elapsedMs = Math.max(0, now - stoppedDate.getTime());
   const elapsedMin = elapsedMs / 60000;
 
   return {

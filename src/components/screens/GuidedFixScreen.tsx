@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Wrench, Lightbulb, CheckCircle2, XCircle } from "lucide-react";
+import { Wrench, Lightbulb, XCircle, CheckCircle2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -12,7 +12,7 @@ import { getIssueById } from "@/lib/mockData";
 import { STRINGS, MOCK_CONTENT, t } from "@/lib/i18n";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NotFoundScreen } from "./NotFoundScreen";
-import type { Step } from "@/lib/types";
+import type { Step, Cause } from "@/lib/types";
 
 // Helper: apply localised overrides to a step
 function localiseStep(step: Step, stepIdx: number, causeLocal: LocalCause | null, lang: "en" | "de"): Step {
@@ -60,7 +60,14 @@ export function GuidedFixScreen() {
   const causeIndex = Number(params.causeIndex);
   const stepNo = Number(params.step);
 
-  const cause = issue?.causes?.[causeIndex];
+  // AI causes stored by DiagnoseScreen take priority over mockData
+  const aiCausesRaw = typeof window !== "undefined"
+    ? localStorage.getItem(`mw_ai_causes_${params.id}`)
+    : null;
+  const aiCauses: Cause[] | null = aiCausesRaw ? JSON.parse(aiCausesRaw) : null;
+
+  const effectiveCauses = aiCauses ?? issue?.causes ?? [];
+  const cause = effectiveCauses[causeIndex] as Cause | undefined;
   const step = cause?.steps?.[stepNo - 1];
   if (!issue || !cause || !step) return <NotFoundScreen />;
 
@@ -98,7 +105,7 @@ export function GuidedFixScreen() {
       hideBottomNav
       contentClassName="flex flex-col"
       right={
-        <span className="shrink-0 text-sm font-medium text-grey-500">
+        <span className="shrink-0 text-sm font-medium text-text-2">
           {t(s.step, lang)} {stepNo}/{totalSteps}
         </span>
       }
@@ -110,18 +117,18 @@ export function GuidedFixScreen() {
       <div className="flex-1 overflow-y-auto space-y-4 px-4 pb-4 pt-4">
 
         {/* Context strip */}
-        <div className="flex items-center justify-between text-sm text-grey-500">
+        <div className="flex items-center justify-between text-sm text-text-2">
           <span>{issue.machine.id} · {t(s.error, lang)} {issue.errorCode}</span>
           <span>~{cause.estMinutes} {t(s.min, lang)}</span>
         </div>
 
         {/* Rare case banner */}
         {causeIndex === 2 && (
-          <div className="rounded-lg border border-purple-200 bg-purple-50 p-3">
-            <div className="mb-1 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-700">
+          <div className="rounded-lg border border-purple-500/30 bg-purple-500/10 p-3">
+            <div className="mb-1 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-400">
               <Lightbulb className="h-4 w-4" /> {t(s.rareCase, lang)}
             </div>
-            <p className="text-sm italic text-purple-700">
+            <p className="text-sm italic text-purple-400">
               {t(s.rareQuote, lang)}
             </p>
           </div>
@@ -130,12 +137,12 @@ export function GuidedFixScreen() {
         {/* Tools */}
         {localStep.tools && localStep.tools.length > 0 && (
           <div>
-            <p className="mb-1.5 text-xs font-medium text-grey-500">{t(s.toolsNeeded, lang)}</p>
+            <p className="mb-1.5 text-xs font-medium text-text-2">{t(s.toolsNeeded, lang)}</p>
             <div className="-mx-4 flex gap-2 overflow-x-auto px-4">
               {localStep.tools.map((tool) => (
                 <span
                   key={tool}
-                  className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-grey-100 px-2.5 py-1 text-xs text-grey-700"
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-surface-2 border border-border px-2.5 py-1 text-xs text-text-2"
                 >
                   <Wrench className="h-3 w-3" />
                   {tool}
@@ -165,30 +172,22 @@ export function GuidedFixScreen() {
       <div className="cta-footer shrink-0 px-4 pt-3">
         {isLast ? (
           <div className="flex gap-2">
-            <Button
-              size="lg"
-              className="flex-1 flex items-center justify-center gap-2"
-              onClick={advance}
-            >
-              <CheckCircle2 className="h-5 w-5" />
+            <Button size="md" className="flex-1" onClick={advance}>
+              <CheckCircle2 className="h-4 w-4" />
               {t(s.machineFix, lang)}
             </Button>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="md"
+              className="flex-1 hover:border-red-500/40 hover:text-red-400"
               onClick={didntFix}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-grey-200 py-2.5 text-sm font-medium text-grey-500 transition-colors hover:border-red-200 hover:text-red-500"
             >
               <XCircle className="h-4 w-4" />
               {t(s.didntFix, lang)}
-            </button>
+            </Button>
           </div>
         ) : (
-          <Button
-            size="lg"
-            className="w-full flex items-center justify-center gap-2"
-            onClick={advance}
-          >
-            <CheckCircle2 className="h-5 w-5" />
+          <Button size="lg" className="w-full" onClick={advance}>
             {t(s.stepDone, lang)}
           </Button>
         )}
