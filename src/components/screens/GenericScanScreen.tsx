@@ -182,12 +182,15 @@ export function GenericScanScreen() {
     })
       .then((r) => r.json())
       .then((data) => {
-        const detected = data.errorCode ? data : MOCK_RESULT;
+        // Always use MOCK_RESULT as base — API response only carries errorCode/errorText/confidence
+        const detected = data.errorCode
+          ? { ...MOCK_RESULT, errorCode: data.errorCode, errorText: data.errorText, confidence: data.confidence ?? MOCK_RESULT.confidence }
+          : MOCK_RESULT;
         setResult(detected);
         setEdits({
-          machine: detected.machine ?? MOCK_RESULT.machine,
-          errorCode: detected.errorCode ?? MOCK_RESULT.errorCode,
-          errorText: detected.errorText ?? MOCK_RESULT.errorText,
+          machine: detected.machine,
+          errorCode: detected.errorCode,
+          errorText: detected.errorText,
         });
       })
       .catch(() => {

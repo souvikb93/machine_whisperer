@@ -54,6 +54,7 @@ export const MOCK_ISSUES: Issue[] = [
             tools: ["Flashlight", "Safety Gloves"],
             safetyNote: "Power down spindle before proceeding",
             safetyLevel: "warning",
+            photoUrl: "/steps/step-1-1.png",
             ifPositive: "Bit damaged → continue to Step 2",
             ifNegative: "Bit intact → tap \"This didn't fix it\"",
           },
@@ -66,6 +67,7 @@ export const MOCK_ISSUES: Issue[] = [
             tools: ["Torque Wrench", "Safety Gloves"],
             safetyNote: "Confirm spindle is fully stopped before touching holder",
             safetyLevel: "warning",
+            photoUrl: "/steps/step-1-2.png",
           },
           {
             number: 3,
@@ -77,6 +79,7 @@ export const MOCK_ISSUES: Issue[] = [
             tools: ["Torque Wrench", "Replacement Drill Bit D12"],
             safetyNote: "Match drill bit diameter — D12 only for CNC-05",
             safetyLevel: "warning",
+            photoUrl: "/steps/step-1-3.png",
           },
           {
             number: 4,
@@ -113,6 +116,7 @@ export const MOCK_ISSUES: Issue[] = [
             tools: ["Flashlight", "Safety Gloves"],
             safetyNote: "Spindle must be off",
             safetyLevel: "warning",
+            photoUrl: "/steps/step-2-1.png",
             ifPositive: "Movement detected → continue to Step 2",
             ifNegative: "No play → tap \"This didn't fix it\"",
           },
@@ -125,6 +129,7 @@ export const MOCK_ISSUES: Issue[] = [
             tools: ["Torque Wrench"],
             safetyNote: "Do not overtighten — damages spindle thread",
             safetyLevel: "danger",
+            photoUrl: "/steps/step-2-2.png",
           },
           {
             number: 3,
@@ -173,6 +178,7 @@ export const MOCK_ISSUES: Issue[] = [
             expectedCondition:
               "Vent should be clear — mesh visible, airflow unobstructed.",
             tools: ["Flashlight"],
+            photoUrl: "/steps/step-3-1.png",
           },
           {
             number: 2,
@@ -184,6 +190,7 @@ export const MOCK_ISSUES: Issue[] = [
             safetyNote:
               "Wear goggles — dust blows back. Do NOT use water near electrical components.",
             safetyLevel: "danger",
+            photoUrl: "/steps/step-3-2.png",
           },
           {
             number: 3,
@@ -193,6 +200,7 @@ export const MOCK_ISSUES: Issue[] = [
             expectedCondition:
               "HMI shows READY · Green status · No error codes.",
             tools: [],
+            photoUrl: "/steps/step-3-3.png",
           },
         ],
       },

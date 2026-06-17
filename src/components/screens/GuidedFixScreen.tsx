@@ -81,11 +81,15 @@ export function GuidedFixScreen() {
   const localCauseTitle = causeLocal ? t(causeLocal.title, lang) : cause.title;
   const localStep = localiseStep(step, stepNo - 1, causeLocal, lang);
 
+  // Fall back to mockData photoUrl matched by cause ID (not index — AI causes may be in different order)
+  const mockCause = issue.causes?.find((c) => c.id === cause.id);
+  const mockPhotoUrl = mockCause?.steps?.[stepNo - 1]?.photoUrl;
+  const stepWithPhoto = localStep.photoUrl ? localStep : { ...localStep, photoUrl: mockPhotoUrl };
+
   const totalSteps = cause.steps.length;
   const isFirst = stepNo <= 1;
   const isLast = stepNo >= totalSteps;
-  const causes = issue.causes ?? [];
-  const hasNextCause = causeIndex + 1 < causes.length;
+  const hasNextCause = causeIndex + 1 < effectiveCauses.length;
 
   function advance() {
     if (isLast) router.push(`/capture/${issue!.id}`);
@@ -164,7 +168,7 @@ export function GuidedFixScreen() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <StepCard step={localStep} />
+          <StepCard step={stepWithPhoto} />
         </motion.div>
       </div>
 

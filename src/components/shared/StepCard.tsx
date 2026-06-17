@@ -37,9 +37,24 @@ export function StepCard({
           {step.instruction}
         </p>
 
-        {/* Photo area (placeholder) */}
-        <div className="relative flex h-48 w-full items-center justify-center rounded-lg bg-surface-2">
-          <div className="flex flex-col items-center gap-1 text-text-2">
+        {/* Photo area */}
+        <div className="relative h-48 w-full overflow-hidden rounded-lg bg-surface-2">
+          {step.photoUrl ? (
+            <img
+              src={step.photoUrl}
+              alt={step.title ?? "Reference photo"}
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                const t = e.currentTarget;
+                t.style.display = "none";
+                t.nextElementSibling?.removeAttribute("hidden");
+              }}
+            />
+          ) : null}
+          <div
+            hidden={!!step.photoUrl}
+            className="flex h-full w-full flex-col items-center justify-center gap-1 text-text-2"
+          >
             <ImageIcon className="h-7 w-7" />
             <span className="text-xs">Reference photo</span>
           </div>

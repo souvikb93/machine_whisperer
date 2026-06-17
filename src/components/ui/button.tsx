@@ -90,7 +90,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <Check className="h-4 w-4 text-green-400 shrink-0" aria-hidden="true" />
         )}
         {/* Label — slightly dim when loading */}
-        <span className={cn(loading && "opacity-70")}>{children}</span>
+        <span className={cn("inline-flex items-center gap-2", loading && "opacity-70")}>{children}</span>
       </button>
     );
   },
